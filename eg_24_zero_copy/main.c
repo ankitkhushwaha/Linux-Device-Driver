@@ -12,7 +12,6 @@
 #include "main.h"
 #include "ioc_cmd.h"
 
-
 static int major;
 static struct zero_copy_dev zdev;
 
@@ -50,8 +49,8 @@ long ioc_open(struct file *filp, struct ioc_msg *__user arg)
 	struct ioc_msg *msg = kzalloc(sizeof(*msg), GFP_KERNEL);
 
 	if (copy_from_user(msg, arg, sizeof(*msg))) {
-	    pr_debug("Error copy from userspace\n");
-	    return -EFAULT;
+		pr_debug("Error copy from userspace\n");
+		return -EFAULT;
 	}
 
 	npages = msg->len >> PAGE_SHIFT;
@@ -68,7 +67,8 @@ long ioc_open(struct file *filp, struct ioc_msg *__user arg)
 	ctx->pages = pages;
 	ctx->pagenr = pinned;
 	ctx->addr = msg->addr;
-	pr_debug("addr=%#lx, len=%#lx, pagenr=%d\n", msg->addr, msg->len, pinned);
+	pr_debug("addr=%#lx, len=%#lx, pagenr=%d\n", msg->addr, msg->len,
+		 pinned);
 
 	kfree(msg);
 	return 0;
@@ -107,10 +107,10 @@ long ioc_put(struct file *filp)
 
 	for (i = 0; i < ctx->pagenr; i++) {
 		addr = page_to_virt(ctx->pages[i]);
-		pr_debug("%#x\n", *((u32*)addr));
+		pr_debug("%#x\n", *((u32 *)addr));
 	}
 
-	return 0;	
+	return 0;
 }
 
 long zero_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
@@ -121,7 +121,7 @@ long zero_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 	switch (cmd) {
 	case IOCTL_OPEN:
 		pr_debug("IOCTL_OPEN\n");
-		return ioc_open(filp, (struct ioc_msg *__user)arg);
+		return ioc_open(filp, (struct ioc_msg * __user) arg);
 	case IOCTL_GET:
 		pr_debug("IOCTL_GET\n");
 		return ioc_get(filp, arg);
@@ -136,14 +136,13 @@ long zero_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 }
 
 static struct file_operations fops = {
-	.owner   = THIS_MODULE,
-	.open    = zero_open,
+	.owner = THIS_MODULE,
+	.open = zero_open,
 	.release = zero_release,
 	.unlocked_ioctl = zero_ioctl,
 };
 
-static
-int __init m_init(void)
+static int __init m_init(void)
 {
 	int result;
 	dev_t devno;
@@ -166,13 +165,11 @@ int __init m_init(void)
 	return 0;
 }
 
-static
-void __exit m_exit(void)
+static void __exit m_exit(void)
 {
 	cdev_del(&zdev.cdev);
 	unregister_chrdev_region(MKDEV(major, 0), DEV_NR);
 }
-
 
 module_init(m_init);
 module_exit(m_exit);

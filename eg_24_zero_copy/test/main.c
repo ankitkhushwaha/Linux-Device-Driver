@@ -18,21 +18,21 @@ int main(void)
 	unsigned long mplen = 4096 * 6;
 	struct ioc_msg msg;
 
-	map_addr = mmap(NULL, mplen, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-	if (map_addr == ((void*)-1)) {
+	map_addr = mmap(NULL, mplen, PROT_READ | PROT_WRITE,
+			MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+	if (map_addr == ((void *)-1)) {
 		printf("map1 fail: %s\n", strerror(errno));
 		return -1;
 	}
 	printf("mmap done: %p\n", map_addr);
 
-
 	// if (munmap(map_addr, 4096) < 0) {
-		// printf("unmap1 fail: %s\n", strerror(errno));
-		// return -1;
+	// printf("unmap1 fail: %s\n", strerror(errno));
+	// return -1;
 	// }
 
 	msg.addr = (unsigned long)map_addr;
-	msg.len  = mplen;
+	msg.len = mplen;
 
 	fd = open("/dev/zero_copy0", O_RDWR);
 	if (fd < 0) {
@@ -55,7 +55,7 @@ int main(void)
 	}
 
 	for (i = 0; i < (mplen / 4096); i++) {
-		val = (uint32_t*)(map_addr + (i * 4096));
+		val = (uint32_t *)(map_addr + (i * 4096));
 		printf("%#x\n", *val);
 		*val = 0xafafafaf;
 	}
@@ -68,7 +68,5 @@ int main(void)
 
 	close(fd);
 
-
 	return 0;
 }
-

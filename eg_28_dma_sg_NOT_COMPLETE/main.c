@@ -8,27 +8,29 @@
 #include "main.h"
 #include "ioctl_cmd.h"
 
-#define PCI_VENDOR_ID_QEMU		0x1234
-#define PCI_KMOD_EDU_VENDOR_ID		PCI_VENDOR_ID_QEMU
+#define PCI_VENDOR_ID_QEMU 0x1234
+#define PCI_KMOD_EDU_VENDOR_ID PCI_VENDOR_ID_QEMU
 // #define PCI_KMOD_EDU_DEVICE_ID		0x7863
-#define PCI_KMOD_EDU_DEVICE_ID		0x11e8
+#define PCI_KMOD_EDU_DEVICE_ID 0x11e8
 
 static struct pci_device_id ids[] = {
-	{ PCI_DEVICE(PCI_KMOD_EDU_VENDOR_ID, PCI_KMOD_EDU_DEVICE_ID), },
-	{ 0, }
+	{
+		PCI_DEVICE(PCI_KMOD_EDU_VENDOR_ID, PCI_KMOD_EDU_DEVICE_ID),
+	},
+	{
+		0,
+	}
 };
 MODULE_DEVICE_TABLE(pci, ids);
 
-static
-int dev_open(struct inode *inode, struct file *filp)
+static int dev_open(struct inode *inode, struct file *filp)
 {
 	filp->private_data = container_of(inode->i_cdev, struct irq_dev, cdev);
 
 	return 0;
 }
 
-static
-struct scatterlist *create_sg_list(int nents)
+static struct scatterlist *create_sg_list(int nents)
 {
 	int i;
 	struct scatterlist *sg;
@@ -49,8 +51,7 @@ struct scatterlist *create_sg_list(int nents)
 	return sg;
 }
 
-static
-void free_sg_list(int nents, struct scatterlist *sg)
+static void free_sg_list(int nents, struct scatterlist *sg)
 {
 	int i;
 	struct page *page;
@@ -62,8 +63,7 @@ void free_sg_list(int nents, struct scatterlist *sg)
 	kfree(sg);
 }
 
-static
-long dma_to(struct irq_dev *irq_dev, void __user *arg, bool to_dev)
+static long dma_to(struct irq_dev *irq_dev, void __user *arg, bool to_dev)
 {
 	int i, rv, count;
 	struct ioc_arg ioc_arg;
@@ -86,10 +86,11 @@ long dma_to(struct irq_dev *irq_dev, void __user *arg, bool to_dev)
 	count = dma_map_sg(irq_dev->pci_dev->dev, sg, 3,
 			   to_dev ? DMA_TO_DEVICE : DMA_FROM_DEVICE);
 	pr_debug("---- actual sg len: %d\n", count);
-	
+
 	if (to_dev) {
 		// src
-		iowrite32(cpu_to_le32(irq_dev->dma_addr), irq_dev->bar[0] + 0x80);
+		iowrite32(cpu_to_le32(irq_dev->dma_addr),
+			  irq_dev->bar[0] + 0x80);
 		// dst
 		iowrite32(0x40000, irq_dev->bar[0] + 0x88);
 		iowrite32(cpu_to_le32(DMA_SIZE), irq_dev->bar[0] + 0x90);
@@ -98,7 +99,8 @@ long dma_to(struct irq_dev *irq_dev, void __user *arg, bool to_dev)
 		// src
 		iowrite32(0x40000, irq_dev->bar[0] + 0x80);
 		// dst
-		iowrite32(cpu_to_le32(irq_dev->dma_addr), irq_dev->bar[0] + 0x88);
+		iowrite32(cpu_to_le32(irq_dev->dma_addr),
+			  irq_dev->bar[0] + 0x88);
 		iowrite32(cpu_to_le32(DMA_SIZE), irq_dev->bar[0] + 0x90);
 		iowrite32(0x04 | 0x02 | 0x01, irq_dev->bar[0] + 0x98);
 	}
@@ -106,8 +108,7 @@ long dma_to(struct irq_dev *irq_dev, void __user *arg, bool to_dev)
 	return 0;
 }
 
-static
-long dev_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+static long dev_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 {
 	int rv = 0;
 	struct irq_dev *irq_dev = filp->private_data;
@@ -145,8 +146,8 @@ int dev_release(struct inode *inode, struct file *filp)
 }
 
 static struct file_operations fops = {
-	.owner   = THIS_MODULE,
-	.open    = dev_open,
+	.owner = THIS_MODULE,
+	.open = dev_open,
 	.unlocked_ioctl = dev_ioctl,
 	.release = dev_release,
 };
@@ -171,8 +172,6 @@ static int create_chrdev(struct irq_dev *irq_dev)
 		return rv;
 	}
 
-
-
 	return 0;
 }
 
@@ -183,7 +182,7 @@ static void destroy_chrdev(struct irq_dev *irq_dev)
 
 irqreturn_t irq_service(int irq, void *dev_id)
 {
-	struct irq_dev *irq_dev = (struct irq_dev*)(dev_id);
+	struct irq_dev *irq_dev = (struct irq_dev *)(dev_id);
 	pr_debug("irq triggered: irq = %d\n", irq);
 
 	return IRQ_HANDLED;
@@ -203,8 +202,8 @@ static int irq_alloc(struct irq_dev *irq_dev)
 {
 	int i, irq, rv, nvec = PCI_KMOD_EDU_MAX_IRQ_VEC;
 
-	nvec = pci_alloc_irq_vectors(irq_dev->pcidev,
-				     1, nvec, PCI_IRQ_ALL_TYPES);
+	nvec = pci_alloc_irq_vectors(irq_dev->pcidev, 1, nvec,
+				     PCI_IRQ_ALL_TYPES);
 	if (nvec < 0) {
 		pr_err("pci_alloc_irq_vectors failed!\n");
 		return nvec;
@@ -213,7 +212,8 @@ static int irq_alloc(struct irq_dev *irq_dev)
 
 	for (i = 0; i < nvec; i++) {
 		irq = pci_irq_vector(irq_dev->pcidev, i);
-		rv = request_irq(irq, irq_service, 0, MODULE_NAME, irq_dev->irqs + i);
+		rv = request_irq(irq, irq_service, 0, MODULE_NAME,
+				 irq_dev->irqs + i);
 		pr_debug("request_irq(%d) == %d\n", irq, rv);
 		if (rv < 0)
 			goto fail;
@@ -321,7 +321,6 @@ static int probe(struct pci_dev *dev, const struct pci_device_id *id)
 	rv = pci_set_consistent_dma_mask(dev, DMA_BIT_MASK(28));
 	pr_err("ERROR  pci_set_consistent_dma_mask: %d\n", rv);
 
-
 	rv = irq_alloc(irq_dev);
 	if (rv < 0) {
 		dev_err(&dev->dev, "can't alloc irq\n");
@@ -362,24 +361,21 @@ static void remove(struct pci_dev *dev)
 }
 
 static struct pci_driver pci_driver = {
-	.name		= MODULE_NAME,
-	.id_table	= ids,
-	.probe		= probe,
-	.remove		= remove,
+	.name = MODULE_NAME,
+	.id_table = ids,
+	.probe = probe,
+	.remove = remove,
 };
 
-static
-int __init m_init(void)
+static int __init m_init(void)
 {
 	return pci_register_driver(&pci_driver);
 }
 
-static
-void __exit m_exit(void)
+static void __exit m_exit(void)
 {
 	pci_unregister_driver(&pci_driver);
 }
-
 
 module_init(m_init);
 module_exit(m_exit);

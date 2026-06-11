@@ -30,8 +30,7 @@ static struct file_operations sculld_fops = {
 	.owner = THIS_MODULE,
 };
 
-static
-int __init m_init(void)
+static int __init m_init(void)
 {
 	int ret, i;
 	struct sculld_dev *dev;
@@ -48,7 +47,8 @@ int __init m_init(void)
 	}
 	devno_major = MAJOR(devno);
 
-	sculld_devices = kzalloc(SCULLD_DEV_NR * sizeof(struct sculld_dev), GFP_KERNEL);
+	sculld_devices =
+		kzalloc(SCULLD_DEV_NR * sizeof(struct sculld_dev), GFP_KERNEL);
 	if (!sculld_devices) {
 		ret = -ENOMEM;
 		goto fail_malloc;
@@ -65,7 +65,8 @@ int __init m_init(void)
 		dev->cdev.owner = THIS_MODULE;
 		cdev_init(&dev->cdev, &sculld_fops);
 		ret = cdev_add(&dev->cdev, devno, 1);
-		device_create(ldd_class, NULL, devno, NULL, MODULE_NAME"%d", i);
+		device_create(ldd_class, NULL, devno, NULL, MODULE_NAME "%d",
+			      i);
 		if (ret) {
 			pr_err("Error %d adding scull%d\n", ret, i);
 			continue;
@@ -84,12 +85,12 @@ fail_malloc:
 	return ret;
 }
 
-static
-void __exit m_exit(void)
+static void __exit m_exit(void)
 {
 	int i;
 	for (i = 0; i < SCULLD_DEV_NR; i++) {
-		device_remove_file(&sculld_devices[i].ldev.dev, &dev_attr_devno);
+		device_remove_file(&sculld_devices[i].ldev.dev,
+				   &dev_attr_devno);
 		unregister_ldd_device(&sculld_devices[i].ldev);
 	}
 
@@ -97,7 +98,6 @@ void __exit m_exit(void)
 	unregister_ldd_driver(&sculld_driver);
 	unregister_chrdev_region(MKDEV(devno_major, 0), SCULLD_DEV_NR);
 }
-
 
 module_init(m_init);
 module_exit(m_exit);

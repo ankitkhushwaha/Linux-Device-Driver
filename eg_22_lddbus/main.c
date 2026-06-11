@@ -48,25 +48,23 @@ static int ldd_match(struct device *dev, struct device_driver *driver)
 }
 
 static ssize_t dev_info_show(struct device *dev, struct device_attribute *attr,
-			char *buf)
+			     char *buf)
 {
 	return snprintf(buf, PAGE_SIZE, "%s\n", dev_name(dev));
 }
 static DEVICE_ATTR_RO(dev_info);
 
 struct bus_type ldd_bus_type = {
-	.name	= "ldd",
-	.match	= ldd_match,
+	.name = "ldd",
+	.match = ldd_match,
 	.uevent = ldd_uevent,
 };
-
 
 /*
  * Device
  */
 static void ldd_dev_release(struct device *dev)
 {
-
 }
 
 int register_ldd_device(struct ldd_device *ldddev)
@@ -118,12 +116,10 @@ void unregister_ldd_driver(struct ldd_driver *driver)
 }
 EXPORT_SYMBOL(unregister_ldd_driver);
 
-
 /*
  * Init and remove
  */
-static
-int __init m_init(void)
+static int __init m_init(void)
 {
 	int ret;
 
@@ -161,8 +157,7 @@ fail1:
 	return ret;
 }
 
-static
-void __exit m_exit(void)
+static void __exit m_exit(void)
 {
 	device_remove_file(&ldd_bus, &dev_attr_dev_info);
 	device_unregister(&ldd_bus);
@@ -171,7 +166,6 @@ void __exit m_exit(void)
 	class_destroy(ldd_class);
 	bus_unregister(&ldd_bus_type);
 }
-
 
 module_init(m_init);
 module_exit(m_exit);

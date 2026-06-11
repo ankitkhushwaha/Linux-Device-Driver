@@ -8,9 +8,8 @@
 #include <stdlib.h>
 #include "ioctl_cmd.h"
 
-#define DEV_FILE		"/dev/dma"
-#define TEST_MSG		"hello world!"
-
+#define DEV_FILE "/dev/dma"
+#define TEST_MSG "hello world!"
 
 int main(int argc, char *argv[])
 {
@@ -29,5 +28,5 @@ int main(int argc, char *argv[])
 	err = ioctl(fd, IOC_DMA_TO_RAM, &ioc_arg);
 	printf("retval = %d\n", err);
 
-	return 0;	
+	return 0;
 }

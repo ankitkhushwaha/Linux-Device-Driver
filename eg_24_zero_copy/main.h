@@ -1,8 +1,8 @@
 #ifndef _MAIN_H
 #define _MAIN_H
 
-#define MODULE_NAME		"zero_copy"
-#define DEV_NR			1
+#define MODULE_NAME "zero_copy"
+#define DEV_NR 1
 
 struct zero_copy_dev {
 	struct cdev cdev;

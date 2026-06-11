@@ -22,7 +22,8 @@ int main(int argc, char *argv[])
 
 	memset(&ifr, 0, sizeof(ifr));
 	strncpy(ifr.ifr_name, "sn0", 5);
-	if (setsockopt(sk, SOL_SOCKET, SO_BINDTODEVICE, (void*)(&ifr), sizeof(ifr)) < 0) {
+	if (setsockopt(sk, SOL_SOCKET, SO_BINDTODEVICE, (void *)(&ifr),
+		       sizeof(ifr)) < 0) {
 		perror("setsocket filed\n");
 		exit(1);
 	}
@@ -32,7 +33,7 @@ int main(int argc, char *argv[])
 	serv_addr.sin_port = htons(5001);
 	serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
 
-	rv = bind(sk, (struct sockaddr*)(&serv_addr), sizeof(serv_addr));
+	rv = bind(sk, (struct sockaddr *)(&serv_addr), sizeof(serv_addr));
 	if (rv) {
 		perror("bind failed\n");
 		exit(1);
@@ -45,7 +46,7 @@ int main(int argc, char *argv[])
 	}
 
 	while (1) {
-		confd = accept(sk, NULL, NULL);	
+		confd = accept(sk, NULL, NULL);
 		printf("accept ==== \n");
 		memset(buf, 0, 1024);
 		recv(confd, buf, 1024, 0);

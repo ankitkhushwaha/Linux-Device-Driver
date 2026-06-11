@@ -14,15 +14,14 @@ static int async_notify_major = 0, async_notify_minor = 0;
 static struct async_notify_dev *async_notify_dev = NULL;
 
 static struct file_operations fops = {
-	.open  = async_notify_open,
-	.read  = async_notify_read,
+	.open = async_notify_open,
+	.read = async_notify_read,
 	.write = async_notify_write,
 	.fasync = async_notify_fasync,
 	.release = async_notify_release,
 };
 
-static
-int __init m_init(void)
+static int __init m_init(void)
 {
 	dev_t devno;
 	int err = 0;
@@ -36,7 +35,8 @@ int __init m_init(void)
 	}
 	memset(async_notify_dev, 0, sizeof(struct async_notify_dev));
 
-	err = alloc_chrdev_region(&devno, async_notify_minor, ASYNC_NOTIFY_DEV_NR, MODULE_NAME);
+	err = alloc_chrdev_region(&devno, async_notify_minor,
+				  ASYNC_NOTIFY_DEV_NR, MODULE_NAME);
 	if (err < 0) {
 		pr_debug("Can't get major!\n");
 		goto on_error;
@@ -61,8 +61,7 @@ on_error:
 	return err;
 }
 
-static
-void __exit m_exit(void)
+static void __exit m_exit(void)
 {
 	dev_t devno;
 
@@ -82,4 +81,3 @@ module_exit(m_exit);
 MODULE_AUTHOR("d0u9");
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("Asynchronous notification for non-block IO");
-

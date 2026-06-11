@@ -7,9 +7,9 @@
 
 #include "main.h"
 
-static struct tty_driver	*ldd_tty_driver;
-static struct tty_port		ldd_tty_port[LDD_TTY_MINOR_NR];
-static struct ldd_tty_dev	*ldd_dev_table[LDD_TTY_MINOR_NR];
+static struct tty_driver *ldd_tty_driver;
+static struct tty_port ldd_tty_port[LDD_TTY_MINOR_NR];
+static struct ldd_tty_dev *ldd_dev_table[LDD_TTY_MINOR_NR];
 
 static int ldd_tty_open(struct tty_struct *tty, struct file *filp)
 {
@@ -32,7 +32,6 @@ static int ldd_tty_open(struct tty_struct *tty, struct file *filp)
 		ldd_dev->open_count = 0;
 
 		ldd_dev_table[index] = ldd_dev;
-
 	}
 
 	mutex_lock(&ldd_dev->mutex);
@@ -64,13 +63,11 @@ static void ldd_tty_close(struct tty_struct *tty, struct file *filp)
 out:
 	pr_info("close .......");
 	mutex_unlock(&ldd_dev->mutex);
-
 }
 
-static int ldd_tty_write(struct tty_struct *tty,
-		     const unsigned char *buf, int count)
+static int ldd_tty_write(struct tty_struct *tty, const unsigned char *buf,
+			 int count)
 {
-
 	pr_info("=---- write\n");
 	return 0;
 }
@@ -81,16 +78,15 @@ static int ldd_tty_write_room(struct tty_struct *tty)
 }
 
 static const struct tty_operations tty_ops = {
-	.open		= ldd_tty_open,
-	.close		= ldd_tty_close,
-	.write		= ldd_tty_write,
-	.write_room	= ldd_tty_write_room,
+	.open = ldd_tty_open,
+	.close = ldd_tty_close,
+	.write = ldd_tty_write,
+	.write_room = ldd_tty_write_room,
 };
 
-static const struct tty_port_operations null_ops = { };
+static const struct tty_port_operations null_ops = {};
 
-static
-int __init m_init(void)
+static int __init m_init(void)
 {
 	int rv, i;
 
@@ -98,9 +94,9 @@ int __init m_init(void)
 	 * alloc_tty_driver is deprecated
 	 */
 	// ldd_tty_driver = alloc_tty_driver(LDD_TTY_MINOR_NR);
-	ldd_tty_driver = tty_alloc_driver(LDD_TTY_MINOR_NR,
-					  TTY_DRIVER_RESET_TERMIOS |
-					  TTY_DRIVER_REAL_RAW);
+	ldd_tty_driver =
+		tty_alloc_driver(LDD_TTY_MINOR_NR, TTY_DRIVER_RESET_TERMIOS |
+							   TTY_DRIVER_REAL_RAW);
 	if (IS_ERR(ldd_tty_driver))
 		return PTR_ERR(ldd_tty_driver);
 
@@ -141,8 +137,7 @@ int __init m_init(void)
 	return 0;
 }
 
-static
-void __exit m_exit(void)
+static void __exit m_exit(void)
 {
 	int i;
 

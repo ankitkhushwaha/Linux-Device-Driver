@@ -33,11 +33,11 @@ int jit_currentime(struct seq_file *m, void *p)
 	ktime_get_coarse_real_ts64(&tv2);
 
 	/* print */
-	seq_printf(m ,"0x%08lx 0x%016Lx %10i.%06i\n"
+	seq_printf(m,
+		   "0x%08lx 0x%016Lx %10i.%06i\n"
 		   "%41i.%09i\n",
-		   j1, j2,
-		   (int) tv1.tv_sec, (int) tv1.tv_nsec,
-		   (int) tv2.tv_sec, (int) tv2.tv_nsec);
+		   j1, j2, (int)tv1.tv_sec, (int)tv1.tv_nsec, (int)tv2.tv_sec,
+		   (int)tv2.tv_nsec);
 	return 0;
 }
 
@@ -54,7 +54,7 @@ int jit_fn(struct seq_file *m, void *p)
 	j0 = jiffies;
 	j1 = j0 + delay;
 
-	switch((long)(m->private)) {
+	switch ((long)(m->private)) {
 	case JIT_BUSY:
 		while (time_before(jiffies, j1))
 			cpu_relax();
@@ -137,15 +137,15 @@ int jit_timer(struct seq_file *m, void *p)
 	init_waitqueue_head(&data->wait);
 
 	buf2 += sprintf(buf2, "   time   delta  inirq    pid   cpu command\n");
-	buf2 += sprintf(buf2, "%9li  %3li     %i    %6i   %i   %s\n",
-			j, 0L, in_interrupt() ? 1 : 0,
-			current->pid, smp_processor_id(), current->comm);
+	buf2 += sprintf(buf2, "%9li  %3li     %i    %6i   %i   %s\n", j, 0L,
+			in_interrupt() ? 1 : 0, current->pid,
+			smp_processor_id(), current->comm);
 
 	/* fill the data for our timer function */
 	data->prevjiffies = j;
 	data->buf = buf2;
 	data->loops = JIT_ASYNC_LOOPS;
-	
+
 	/* register the timer */
 	data->timer.expires = j + tdelay; /* parameter */
 	add_timer(&data->timer);
@@ -158,7 +158,6 @@ int jit_timer(struct seq_file *m, void *p)
 	}
 
 	seq_printf(m, "%s", buf);
-
 
 out:
 	kfree(buf);
@@ -216,9 +215,9 @@ int jit_tasklet(struct seq_file *m, void *p)
 
 	/* write the first lines in the buffer */
 	buf2 += sprintf(buf2, "   time   delta  inirq    pid   cpu command\n");
-	buf2 += sprintf(buf2, "%9li  %3li     %i    %6i   %i   %s\n",
-			j, 0L, in_interrupt() ? 1 : 0,
-			current->pid, smp_processor_id(), current->comm);
+	buf2 += sprintf(buf2, "%9li  %3li     %i    %6i   %i   %s\n", j, 0L,
+			in_interrupt() ? 1 : 0, current->pid,
+			smp_processor_id(), current->comm);
 
 	/* fill the data for our tasklet function */
 	data->prevjiffies = j;
@@ -251,4 +250,3 @@ alloc_buf_error:
 
 	return retval;
 }
-

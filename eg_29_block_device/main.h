@@ -1,10 +1,10 @@
 #ifndef _MAIN_H
 #define _MAIN_H
 
-#define MODULE_NAME			"memdisk"
+#define MODULE_NAME "memdisk"
 
 struct ldd_dev {
-	int major;	
+	int major;
 	int size;
 	u8 *data;
 	short users;

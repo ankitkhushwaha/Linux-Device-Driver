@@ -13,14 +13,13 @@ static int proc_release(struct inode *inode, struct file *filp);
 
 static struct proc_dir_entry *parent = NULL;
 static struct proc_ops proc_ops = {
-	.proc_open    = proc_open,
-	.proc_read    = seq_read,
-	.proc_lseek   = seq_lseek,
+	.proc_open = proc_open,
+	.proc_read = seq_read,
+	.proc_lseek = seq_lseek,
 	.proc_release = proc_release,
 };
 
-static
-int proc_show(struct seq_file *m, void *v)
+static int proc_show(struct seq_file *m, void *v)
 {
 	int c = (m->private) ? (long)(m->private) : 1;
 
@@ -30,8 +29,7 @@ int proc_show(struct seq_file *m, void *v)
 	return 0;
 }
 
-static
-int proc_open(struct inode *inode, struct file *filp)
+static int proc_open(struct inode *inode, struct file *filp)
 {
 	/*
 	 * the variable passed from proc_create_data() can be extracted
@@ -42,14 +40,12 @@ int proc_open(struct inode *inode, struct file *filp)
 	return single_open(filp, proc_show, PDE_DATA(inode));
 }
 
-static
-int proc_release(struct inode *inode, struct file *filp)
+static int proc_release(struct inode *inode, struct file *filp)
 {
 	return single_release(inode, filp);
 }
 
-static
-int __init m_init(void)
+static int __init m_init(void)
 {
 	printk(KERN_WARNING MODULE_NAME " is loaded\n");
 
@@ -58,15 +54,14 @@ int __init m_init(void)
 		return -ENOMEM;
 
 	/* pass variable to open */
-	if (!proc_create_data(PROC_FS_NAME_MUL, 0, parent,
-			      &proc_ops, (void*)PRINT_NR))
+	if (!proc_create_data(PROC_FS_NAME_MUL, 0, parent, &proc_ops,
+			      (void *)PRINT_NR))
 		return -ENOMEM;
 
 	return 0;
 }
 
-static
-void __exit m_exit(void)
+static void __exit m_exit(void)
 {
 	printk(KERN_WARNING MODULE_NAME " unloaded\n");
 

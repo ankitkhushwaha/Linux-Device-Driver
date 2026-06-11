@@ -12,13 +12,14 @@ int seeking_open(struct inode *inode, struct file *filp)
 {
 	pr_debug("%s() is invoked\n", __FUNCTION__);
 
-	filp->private_data = container_of(inode->i_cdev, struct seeking_dev, cdev);
+	filp->private_data =
+		container_of(inode->i_cdev, struct seeking_dev, cdev);
 
 	return 0;
 }
 
 ssize_t seeking_read(struct file *filp, char __user *buff, size_t count,
- 		 loff_t *f_pos)
+		     loff_t *f_pos)
 {
 	struct seeking_dev *dev = filp->private_data;
 	int retval = 0;
@@ -37,7 +38,7 @@ ssize_t seeking_read(struct file *filp, char __user *buff, size_t count,
 		goto copy_error;
 	}
 
-	*f_pos = (*f_pos + count ) % HEX_DICT_LEN;
+	*f_pos = (*f_pos + count) % HEX_DICT_LEN;
 
 	retval = count;
 
@@ -52,7 +53,7 @@ loff_t seeking_llseek(struct file *filp, loff_t off, int whence)
 
 	pr_debug("%s() is invoked\n", __FUNCTION__);
 
-	switch(whence) {
+	switch (whence) {
 	case 0: /* SEEK_SET */
 		newpos = off % HEX_DICT_LEN;
 		break;
@@ -67,7 +68,6 @@ loff_t seeking_llseek(struct file *filp, loff_t off, int whence)
 
 	default:
 		return -EINVAL;
-
 	}
 
 	if (newpos >= HEX_DICT_LEN)

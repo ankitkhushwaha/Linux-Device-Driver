@@ -34,12 +34,11 @@ static void ldd_tty_close(struct tty_struct *tty, struct file *filp)
 /*
  * TTY operations write function.
  */
-static int ldd_tty_write(struct tty_struct *tty,
-		const unsigned char *buf, int count)
+static int ldd_tty_write(struct tty_struct *tty, const unsigned char *buf,
+			 int count)
 {
 	// struct ttyprintk_port *tpkp = tty->driver_data;
 	// unsigned long flags;
-
 
 	/* exclusive use of tpk_printk within this tty */
 	pr_info("write ... \n");
@@ -55,42 +54,41 @@ static int ldd_tty_write_room(struct tty_struct *tty)
 	return LDD_TTY_MAX_ROOM;
 }
 
-static int ldd_tty_ioctl(struct tty_struct *tty,
-			unsigned int cmd, unsigned long arg)
+static int ldd_tty_ioctl(struct tty_struct *tty, unsigned int cmd,
+			 unsigned long arg)
 {
 	// struct ttyprintk_port *tpkp = tty->driver_data;
 
 	// if (!tpkp)
-		// return -EINVAL;
+	// return -EINVAL;
 
 	// switch (cmd) {
 	// [> Stop TIOCCONS <]
 	// case TIOCCONS:
-		// return -EOPNOTSUPP;
+	// return -EOPNOTSUPP;
 	// default:
-		// return -ENOIOCTLCMD;
+	// return -ENOIOCTLCMD;
 	// }
 	return 0;
 }
 
 static const struct tty_operations ttyprintk_ops = {
-	.open		= ldd_tty_open,
-	.close		= ldd_tty_close,
-	.write		= ldd_tty_write,
-	.write_room	= ldd_tty_write_room,
-	.ioctl		= ldd_tty_ioctl,
+	.open = ldd_tty_open,
+	.close = ldd_tty_close,
+	.write = ldd_tty_write,
+	.write_room = ldd_tty_write_room,
+	.ioctl = ldd_tty_ioctl,
 };
 
-static const struct tty_port_operations null_ops = { };
+static const struct tty_port_operations null_ops = {};
 
-static
-int __init m_init(void)
+static int __init m_init(void)
 {
 	int i, ret = -ENOMEM;
 
-	ldd_tty_driver = tty_alloc_driver(LDD_TTY_MINOR_NR,
-			TTY_DRIVER_RESET_TERMIOS |
-			TTY_DRIVER_REAL_RAW);
+	ldd_tty_driver =
+		tty_alloc_driver(LDD_TTY_MINOR_NR, TTY_DRIVER_RESET_TERMIOS |
+							   TTY_DRIVER_REAL_RAW);
 
 	if (IS_ERR(ldd_tty_driver)) {
 		pr_info("-----------x\n");
@@ -108,7 +106,8 @@ int __init m_init(void)
 	ldd_tty_driver->major = LDD_TTY_MAJOR;
 	ldd_tty_driver->type = TTY_DRIVER_TYPE_SERIAL;
 	ldd_tty_driver->init_termios = tty_std_termios;
-	ldd_tty_driver->init_termios.c_cflag = B9600 | CS8 | CREAD | HUPCL | CLOCAL;
+	ldd_tty_driver->init_termios.c_cflag = B9600 | CS8 | CREAD | HUPCL |
+					       CLOCAL;
 	tty_set_operations(ldd_tty_driver, &ttyprintk_ops);
 
 	ret = tty_register_driver(ldd_tty_driver);
@@ -126,8 +125,7 @@ error:
 	return ret;
 }
 
-static
-void __exit m_exit(void)
+static void __exit m_exit(void)
 {
 	int i;
 	tty_unregister_driver(ldd_tty_driver);

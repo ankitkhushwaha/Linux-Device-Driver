@@ -1,9 +1,9 @@
 #ifndef _MAIN_H
 #define _MAIN_H
 
-#define MODULE_NAME		"async_io"
-#define DEV_NR	1
-#define BUFF_SIZE		((int)PAGE_SIZE)
+#define MODULE_NAME "async_io"
+#define DEV_NR 1
+#define BUFF_SIZE ((int)PAGE_SIZE)
 
 struct async_io_dev {
 	struct cdev cdev;
@@ -13,6 +13,5 @@ struct async_io_dev {
 	int write_cur;
 	char buff[PAGE_SIZE];
 };
-
 
 #endif

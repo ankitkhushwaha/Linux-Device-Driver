@@ -4,7 +4,7 @@
 #include <linux/slab.h>
 #include <linux/netdevice.h>
 #include <linux/etherdevice.h> /* eth_type_trans */
-#include <linux/ip.h>          /* struct iphdr */
+#include <linux/ip.h> /* struct iphdr */
 #include <net/ip.h>
 
 #include "main.h"
@@ -37,11 +37,12 @@ void ldd_dev_rx(struct net_device *dev, struct ldd_packet *pkt)
 	skb = dev_alloc_skb(pkt->datalen + 2); // TODO: why add 2?
 	if (!skb) {
 		if (printk_ratelimit())
-			printk(KERN_NOTICE "snull rx: low on mem - packet dropped\n");
+			printk(KERN_NOTICE
+			       "snull rx: low on mem - packet dropped\n");
 		ldd_dev->stats.rx_dropped++;
 		goto out;
 	}
-	skb_reserve(skb, 2); /* align IP on 16B boundary */  
+	skb_reserve(skb, 2); /* align IP on 16B boundary */
 	memcpy(skb_put(skb, pkt->datalen), pkt->data, pkt->datalen);
 
 	/* Write metadata, and then pass to the receive level */
@@ -53,10 +54,10 @@ void ldd_dev_rx(struct net_device *dev, struct ldd_packet *pkt)
 	ldd_dev->stats.rx_bytes += pkt->datalen;
 	pr_debug("====== push skb ========\n");
 
-	print_hex_dump(KERN_DEBUG, "skb int raw: ", DUMP_PREFIX_OFFSET,
-		       16, 1, skb->data, skb->len, true);
+	print_hex_dump(KERN_DEBUG, "skb int raw: ", DUMP_PREFIX_OFFSET, 16, 1,
+		       skb->data, skb->len, true);
 	netif_rx(skb);
-  out:
+out:
 	return;
 }
 
@@ -64,7 +65,7 @@ void ldd_release_buffer(struct ldd_packet *pkt)
 {
 	unsigned long flags;
 	struct ldd_dev *ldd_dev = netdev_priv(pkt->dev);
-	
+
 	spin_lock_irqsave(&ldd_dev->lock, flags);
 	pkt->next = ldd_dev->pkt_pool;
 	ldd_dev->pkt_pool = pkt;
@@ -76,20 +77,18 @@ void ldd_release_buffer(struct ldd_packet *pkt)
 	pr_debug("release pkt: dev = %s\n", pkt->dev->name);
 }
 
-static
-void ldd_enqueue_buf(struct net_device *dev, struct ldd_packet *pkt)
+static void ldd_enqueue_buf(struct net_device *dev, struct ldd_packet *pkt)
 {
 	unsigned long flags;
 	struct ldd_dev *ldd_dev = netdev_priv(dev);
 
 	spin_lock_irqsave(&ldd_dev->lock, flags);
-	pkt->next = ldd_dev->rx_queue;  /* FIXME - misorders packets */
+	pkt->next = ldd_dev->rx_queue; /* FIXME - misorders packets */
 	ldd_dev->rx_queue = pkt;
 	spin_unlock_irqrestore(&ldd_dev->lock, flags);
 }
 
-static
-struct ldd_packet *ldd_dequeue_buf(struct net_device *dev)
+static struct ldd_packet *ldd_dequeue_buf(struct net_device *dev)
 {
 	struct ldd_dev *ldd_dev = netdev_priv(dev);
 	struct ldd_packet *pkt;
@@ -103,8 +102,7 @@ struct ldd_packet *ldd_dequeue_buf(struct net_device *dev)
 	return pkt;
 }
 
-static
-void ldd_regular_interrupt(int irq, void *dev_id, struct pt_regs *regs)
+static void ldd_regular_interrupt(int irq, void *dev_id, struct pt_regs *regs)
 {
 	int statusword;
 	unsigned long flags;
@@ -142,8 +140,7 @@ void ldd_regular_interrupt(int irq, void *dev_id, struct pt_regs *regs)
 		ldd_release_buffer(pkt); /* Do this outside the lock! */
 }
 
-static
-int ldd_dev_poll(struct napi_struct *napi, int budget)
+static int ldd_dev_poll(struct napi_struct *napi, int budget)
 {
 	int rv, npackets = 0;
 	unsigned long flags;
@@ -187,7 +184,8 @@ int ldd_dev_poll(struct napi_struct *napi, int budget)
 	if (npackets < budget) {
 		spin_lock_irqsave(&ldd_dev->lock, flags);
 		if (napi_complete_done(napi, npackets)) {
-			pr_debug("openirq: %s, npackets = %d\n", dev->name, npackets);
+			pr_debug("openirq: %s, npackets = %d\n", dev->name,
+				 npackets);
 			ldd_dev->rx_int_enabled = true;
 		}
 		spin_unlock_irqrestore(&ldd_dev->lock, flags);
@@ -195,8 +193,7 @@ int ldd_dev_poll(struct napi_struct *napi, int budget)
 	return npackets;
 }
 
-static
-void ldd_napi_interrupt(int irq, void *dev_id, struct pt_regs *regs)
+static void ldd_napi_interrupt(int irq, void *dev_id, struct pt_regs *regs)
 {
 	int statusword;
 	unsigned long flags;
@@ -224,14 +221,15 @@ void ldd_napi_interrupt(int irq, void *dev_id, struct pt_regs *regs)
 	if (statusword & NETDEV_RX_INTR) {
 		pr_debug("schedule: %s, %s, napi=%px\n", dev->name,
 			 ldd_dev->net_dev->name, &ldd_dev->napi);
-			ldd_dev->rx_int_enabled = false; /* Disable further interrupts */
-			napi_schedule(&ldd_dev->napi);
+		ldd_dev->rx_int_enabled =
+			false; /* Disable further interrupts */
+		napi_schedule(&ldd_dev->napi);
 	}
 	if (statusword & NETDEV_TX_INTR) {
-        	/* a transmission is over: free the skb */
+		/* a transmission is over: free the skb */
 		ldd_dev->stats.tx_packets++;
 		ldd_dev->stats.tx_bytes += ldd_dev->tx_packetlen;
-		if(ldd_dev->skb) {
+		if (ldd_dev->skb) {
 			dev_kfree_skb(ldd_dev->skb);
 			ldd_dev->skb = 0;
 		}
@@ -242,9 +240,7 @@ void ldd_napi_interrupt(int irq, void *dev_id, struct pt_regs *regs)
 	spin_unlock(&ldd_dev->lock);
 }
 
-
-static
-int ldd_netdev_open(struct net_device *dev)
+static int ldd_netdev_open(struct net_device *dev)
 {
 	/* request_region(), request_irq(), ....  (like fops->open) */
 
@@ -254,10 +250,10 @@ int ldd_netdev_open(struct net_device *dev)
 
 	memcpy(dev->dev_addr, "\0SNUL0", ETH_ALEN);
 	if (dev == net_devs[1])
-		dev->dev_addr[ETH_ALEN-1]++; /* \0SNUL1 */
+		dev->dev_addr[ETH_ALEN - 1]++; /* \0SNUL1 */
 
-	pr_debug("======== enable napi = %px, napi = %px \n",
-		 dev, &ldd_dev->napi);
+	pr_debug("======== enable napi = %px, napi = %px \n", dev,
+		 &ldd_dev->napi);
 	if (use_napi)
 		napi_enable(&ldd_dev->napi);
 
@@ -267,8 +263,7 @@ int ldd_netdev_open(struct net_device *dev)
 	return 0;
 }
 
-static
-int ldd_netdev_release(struct net_device *dev)
+static int ldd_netdev_release(struct net_device *dev)
 {
 	struct ldd_dev *ldd_dev = netdev_priv(dev);
 
@@ -282,23 +277,21 @@ int ldd_netdev_release(struct net_device *dev)
 	return 0;
 }
 
-static
-int ldd_netdev_ioctl(struct net_device *dev, struct ifreq *rq, int cmd)
+static int ldd_netdev_ioctl(struct net_device *dev, struct ifreq *rq, int cmd)
 {
 	pr_debug("ioctl\n");
 	return 0;
 }
 
-static
-struct ldd_packet *ldd_get_tx_buffer(struct net_device *dev)
+static struct ldd_packet *ldd_get_tx_buffer(struct net_device *dev)
 {
 	unsigned long flags;
 	struct ldd_dev *ldd_dev = netdev_priv(dev);
 	struct ldd_packet *pkt;
-    
+
 	spin_lock_irqsave(&ldd_dev->lock, flags);
 	pkt = ldd_dev->pkt_pool;
-	if(!pkt) {
+	if (!pkt) {
 		pr_debug("Out of Pool\n");
 		return pkt;
 	}
@@ -311,8 +304,7 @@ struct ldd_packet *ldd_get_tx_buffer(struct net_device *dev)
 	return pkt;
 }
 
-static
-int ldd_netdev_hw_tx(struct sk_buff *skb, struct net_device *dev)
+static int ldd_netdev_hw_tx(struct sk_buff *skb, struct net_device *dev)
 {
 	int rv, len;
 	struct iphdr *iphdr;
@@ -323,11 +315,10 @@ int ldd_netdev_hw_tx(struct sk_buff *skb, struct net_device *dev)
 
 	pr_debug("======= New tx ==========\n");
 
-
 	// print_hex_dump(KERN_DEBUG, "skb tx raw: ", DUMP_PREFIX_OFFSET,
-		       // 16, 1, skb->data, skb->len, true);
+	// 16, 1, skb->data, skb->len, true);
 
-	iphdr = (struct iphdr*)skb_network_header(skb);
+	iphdr = (struct iphdr *)skb_network_header(skb);
 	saddr = &iphdr->saddr;
 	daddr = &iphdr->daddr;
 
@@ -358,8 +349,8 @@ int ldd_netdev_hw_tx(struct sk_buff *skb, struct net_device *dev)
 	dest_ldd_dev = netdev_priv(dest_dev);
 
 	tx_buffer = ldd_get_tx_buffer(dev);
-	if(!tx_buffer) {
-		pr_debug("Out of tx buffer, len is %i\n",len);
+	if (!tx_buffer) {
+		pr_debug("Out of tx buffer, len is %i\n", len);
 		return -ENOMEM;
 	}
 
@@ -372,7 +363,6 @@ int ldd_netdev_hw_tx(struct sk_buff *skb, struct net_device *dev)
 		dest_ldd_dev->status |= NETDEV_RX_INTR;
 		ldd_interrupt(0, dest_dev, NULL);
 	}
-
 
 	src_ldd_dev = netdev_priv(dev);
 	src_ldd_dev->tx_packetlen = len;
@@ -393,8 +383,7 @@ int ldd_netdev_hw_tx(struct sk_buff *skb, struct net_device *dev)
 	return 0;
 }
 
-static
-int ldd_netdev_tx(struct sk_buff *skb, struct net_device *dev)
+static int ldd_netdev_tx(struct sk_buff *skb, struct net_device *dev)
 {
 	struct ldd_dev *ldd_dev = netdev_priv(dev);
 
@@ -407,53 +396,51 @@ int ldd_netdev_tx(struct sk_buff *skb, struct net_device *dev)
 	return ldd_netdev_hw_tx(skb, dev);
 }
 
-static
-struct net_device_stats *ldd_netdev_stats(struct net_device *dev)
+static struct net_device_stats *ldd_netdev_stats(struct net_device *dev)
 {
 	struct ldd_dev *ldd_dev = netdev_priv(dev);
 	return &ldd_dev->stats;
 }
 
 int ldd_netdev_header(struct sk_buff *skb, struct net_device *dev,
-                unsigned short type, const void *daddr, const void *saddr,
-                unsigned len)
+		      unsigned short type, const void *daddr, const void *saddr,
+		      unsigned len)
 {
-	struct ethhdr *eth = (struct ethhdr *)skb_push(skb,ETH_HLEN);
+	struct ethhdr *eth = (struct ethhdr *)skb_push(skb, ETH_HLEN);
 
 	eth->h_proto = htons(type);
 	pr_debug("in-> saddr = %llx, daddr = %llx\n",
-		 saddr ? *((u64*)saddr) : 0,
-		 daddr ? *((u64*)daddr) : 0);
+		 saddr ? *((u64 *)saddr) : 0, daddr ? *((u64 *)daddr) : 0);
 	memcpy(eth->h_source, saddr ? saddr : dev->dev_addr, dev->addr_len);
-	memcpy(eth->h_dest,   daddr ? daddr : dev->dev_addr, dev->addr_len);
-	eth->h_dest[ETH_ALEN - 1]   ^= 0x01;
+	memcpy(eth->h_dest, daddr ? daddr : dev->dev_addr, dev->addr_len);
+	eth->h_dest[ETH_ALEN - 1] ^= 0x01;
 	return (dev->hard_header_len);
 }
 
 static const struct header_ops ldd_header_ops = {
-	.create  = ldd_netdev_header,
+	.create = ldd_netdev_header,
 };
 
 static const struct net_device_ops ldd_netdev_ops = {
-	.ndo_open            = ldd_netdev_open,
-	.ndo_stop            = ldd_netdev_release,
-	.ndo_start_xmit      = ldd_netdev_tx,
-	.ndo_do_ioctl        = ldd_netdev_ioctl,
+	.ndo_open = ldd_netdev_open,
+	.ndo_stop = ldd_netdev_release,
+	.ndo_start_xmit = ldd_netdev_tx,
+	.ndo_do_ioctl = ldd_netdev_ioctl,
 	// .ndo_set_config      = snull_config,
-	.ndo_get_stats       = ldd_netdev_stats,
+	.ndo_get_stats = ldd_netdev_stats,
 	// .ndo_change_mtu      = snull_change_mtu,
 	// .ndo_tx_timeout      = snull_tx_timeout,
 };
 
-static
-int ldd_setup_pool(struct net_device *dev)
+static int ldd_setup_pool(struct net_device *dev)
 {
 	int i;
 	struct ldd_dev *ldd_dev = netdev_priv(dev);
 	struct ldd_packet *pkt, *next;
 
 	pr_debug("pool_size = %d\n", pool_size);
-	ldd_dev->pkt_arr = kcalloc(pool_size, sizeof(struct ldd_packet), GFP_KERNEL);
+	ldd_dev->pkt_arr =
+		kcalloc(pool_size, sizeof(struct ldd_packet), GFP_KERNEL);
 	if (!ldd_dev->pkt_arr) {
 		pr_err("Alloc memeory for pool failed\n");
 		return -ENOMEM;
@@ -472,17 +459,14 @@ int ldd_setup_pool(struct net_device *dev)
 	return 0;
 }
 
-static
-void ldd_teardown_pool(struct net_device *dev)
+static void ldd_teardown_pool(struct net_device *dev)
 {
 	struct ldd_dev *ldd_dev = netdev_priv(dev);
 
 	kfree(ldd_dev->pkt_arr);
-}    
+}
 
-
-static
-void ldd_dev_init(struct net_device *dev)
+static void ldd_dev_init(struct net_device *dev)
 {
 	struct ldd_dev *ldd_dev;
 
@@ -490,8 +474,8 @@ void ldd_dev_init(struct net_device *dev)
 	dev->watchdog_timeo = timeout;
 	dev->netdev_ops = &ldd_netdev_ops;
 	dev->header_ops = &ldd_header_ops;
-	dev->flags           |= IFF_NOARP;
-	dev->features        |= NETIF_F_HW_CSUM;
+	dev->flags |= IFF_NOARP;
+	dev->features |= NETIF_F_HW_CSUM;
 
 	ldd_dev = netdev_priv(dev);
 	memset(ldd_dev, 0, sizeof(struct ldd_dev));
@@ -502,11 +486,9 @@ void ldd_dev_init(struct net_device *dev)
 	if (use_napi) {
 		netif_napi_add(dev, &ldd_dev->napi, ldd_dev_poll, 2);
 	}
-
 }
 
-static
-void ldd_cleanup(void)
+static void ldd_cleanup(void)
 {
 	int i;
 	for (i = 0; i < 2; i++) {
@@ -518,8 +500,7 @@ void ldd_cleanup(void)
 	}
 }
 
-static
-int __init m_init(void)
+static int __init m_init(void)
 {
 	int i, rv;
 	struct ldd_dev *ldd_dev;
@@ -545,7 +526,7 @@ int __init m_init(void)
 	ldd_dev = netdev_priv(net_devs[1]);
 	pr_debug("1 napi = %px\n", &ldd_dev->napi);
 
-	for (i = 0; i < 2;  i++) {
+	for (i = 0; i < 2; i++) {
 		rv = ldd_setup_pool(net_devs[i]);
 		if (rv) {
 			pr_err("Setup pool failed for device %d\n", i);
@@ -559,7 +540,6 @@ int __init m_init(void)
 			rv = -ENODEV;
 			goto out;
 		}
-
 	}
 
 #if 0
@@ -572,15 +552,13 @@ int __init m_init(void)
 	}
 #endif
 
-
 	return 0;
 out:
 	ldd_cleanup();
 	return rv;
 }
 
-static
-void __exit m_exit(void)
+static void __exit m_exit(void)
 {
 	ldd_cleanup();
 }

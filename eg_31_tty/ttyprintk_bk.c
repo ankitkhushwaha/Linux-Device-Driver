@@ -115,13 +115,12 @@ static void tpk_close(struct tty_struct *tty, struct file *filp)
 /*
  * TTY operations write function.
  */
-static int tpk_write(struct tty_struct *tty,
-		const unsigned char *buf, int count)
+static int tpk_write(struct tty_struct *tty, const unsigned char *buf,
+		     int count)
 {
 	struct ttyprintk_port *tpkp = tty->driver_data;
 	unsigned long flags;
 	int ret;
-
 
 	/* exclusive use of tpk_printk within this tty */
 	spin_lock_irqsave(&tpkp->spinlock, flags);
@@ -142,8 +141,8 @@ static int tpk_write_room(struct tty_struct *tty)
 /*
  * TTY operations ioctl function.
  */
-static int tpk_ioctl(struct tty_struct *tty,
-			unsigned int cmd, unsigned long arg)
+static int tpk_ioctl(struct tty_struct *tty, unsigned int cmd,
+		     unsigned long arg)
 {
 	struct ttyprintk_port *tpkp = tty->driver_data;
 
@@ -168,7 +167,7 @@ static const struct tty_operations ttyprintk_ops = {
 	.ioctl = tpk_ioctl,
 };
 
-static const struct tty_port_operations null_ops = { };
+static const struct tty_port_operations null_ops = {};
 
 static struct tty_driver *ttyprintk_driver;
 
@@ -178,10 +177,9 @@ static int __init ttyprintk_init(void)
 
 	spin_lock_init(&tpk_port.spinlock);
 
-	ttyprintk_driver = tty_alloc_driver(1,
-			TTY_DRIVER_RESET_TERMIOS |
-			TTY_DRIVER_REAL_RAW |
-			TTY_DRIVER_UNNUMBERED_NODE);
+	ttyprintk_driver = tty_alloc_driver(
+		1, TTY_DRIVER_RESET_TERMIOS | TTY_DRIVER_REAL_RAW |
+			   TTY_DRIVER_UNNUMBERED_NODE);
 	if (IS_ERR(ttyprintk_driver))
 		return PTR_ERR(ttyprintk_driver);
 

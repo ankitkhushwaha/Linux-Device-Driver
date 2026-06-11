@@ -14,14 +14,13 @@ static int poll_major = 0, poll_minor = 0;
 static struct poll_dev *poll_dev = NULL;
 
 static struct file_operations fops = {
-	.open  = poll_open,
-	.read  = poll_read,
+	.open = poll_open,
+	.read = poll_read,
 	.write = poll_write,
-	.poll  = poll_poll,
+	.poll = poll_poll,
 };
 
-static
-void timer_fn(struct timer_list *t)
+static void timer_fn(struct timer_list *t)
 {
 	struct poll_dev *dev = from_timer(dev, t, timer);
 
@@ -43,8 +42,7 @@ void timer_fn(struct timer_list *t)
 	add_timer(&dev->timer);
 }
 
-static
-void init_dev(struct poll_dev *dev)
+static void init_dev(struct poll_dev *dev)
 {
 	mutex_init(&dev->mutex);
 	timer_setup(&dev->timer, timer_fn, 0);
@@ -65,8 +63,7 @@ void init_dev(struct poll_dev *dev)
 	memcpy(dev->buff, DFT_MSG, dev->buf_len);
 }
 
-static
-int __init m_init(void)
+static int __init m_init(void)
 {
 	dev_t devno;
 	int err = 0;
@@ -102,8 +99,7 @@ on_error:
 	return err;
 }
 
-static
-void __exit m_exit(void)
+static void __exit m_exit(void)
 {
 	dev_t devno;
 
@@ -124,4 +120,3 @@ module_exit(m_exit);
 MODULE_AUTHOR("d0u9");
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("A simple poll example");
-

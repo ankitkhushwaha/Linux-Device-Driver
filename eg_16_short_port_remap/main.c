@@ -28,7 +28,8 @@ int short_release(struct inode *inode, struct file *filp)
 	return 0;
 }
 
-ssize_t short_read(struct file *filp, char __user *buf, size_t count, loff_t *f_pos)
+ssize_t short_read(struct file *filp, char __user *buf, size_t count,
+		   loff_t *f_pos)
 {
 	char v;
 
@@ -49,7 +50,7 @@ ssize_t short_read(struct file *filp, char __user *buf, size_t count, loff_t *f_
 }
 
 ssize_t short_write(struct file *filp, const char __user *buf, size_t count,
-		loff_t *f_pos)
+		    loff_t *f_pos)
 {
 	unsigned char *kbuf, *ptr;
 	size_t cnt = count;
@@ -75,15 +76,14 @@ ssize_t short_write(struct file *filp, const char __user *buf, size_t count,
 }
 
 static struct file_operations fops = {
-	.owner	 = THIS_MODULE,
-	.read	 = short_read,
-	.write	 = short_write,
-	.open	 = short_open,
+	.owner = THIS_MODULE,
+	.read = short_read,
+	.write = short_write,
+	.open = short_open,
 	.release = short_release,
 };
 
-static
-int __init m_init(void)
+static int __init m_init(void)
 {
 	int result = 0;
 	short_base = base;
@@ -114,14 +114,12 @@ out:
 	return result;
 }
 
-static
-void __exit m_exit(void)
+static void __exit m_exit(void)
 {
 	unregister_chrdev(major, MODULE_NAME);
 	ioport_unmap(short_iomem);
 	release_region(short_base, SHORT_NR_PORTS);
 }
-
 
 module_init(m_init);
 module_exit(m_exit);

@@ -15,7 +15,8 @@ int async_notify_open(struct inode *inode, struct file *filp)
 {
 	pr_debug("%s() is invoked\n", __FUNCTION__);
 
-	filp->private_data = container_of(inode->i_cdev, struct async_notify_dev, cdev);
+	filp->private_data =
+		container_of(inode->i_cdev, struct async_notify_dev, cdev);
 
 	return 0;
 }
@@ -34,7 +35,6 @@ ssize_t async_notify_read(struct file *filp, char __user *buff, size_t count,
 	if (count > dev->buf_len - *f_pos)
 		count = dev->buf_len - *f_pos;
 
-	
 	if (copy_to_user(buff, dev->buff + *f_pos, count)) {
 		retval = -EFAULT;
 		goto cpy_user_error;

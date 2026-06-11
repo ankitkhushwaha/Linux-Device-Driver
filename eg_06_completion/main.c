@@ -1,5 +1,5 @@
 #include <linux/module.h>
-#include <linux/init.h> 
+#include <linux/init.h>
 #include <linux/sched.h>
 #include <linux/kernel.h>
 #include <linux/fs.h>
@@ -13,41 +13,40 @@ static int completion_major = 0, completion_minor = 0;
 
 static struct completion_dev completion_dev;
 
-static
-int completion_open(struct inode *inode, struct file *filp)
+static int completion_open(struct inode *inode, struct file *filp)
 {
 	pr_debug("%s() is invoked\n", __FUNCTION__);
 
-	filp->private_data = container_of(inode->i_cdev,
-					  struct completion_dev, cdev);
+	filp->private_data =
+		container_of(inode->i_cdev, struct completion_dev, cdev);
 
 	return 0;
 }
 
-static
-ssize_t completion_read(struct file *filp, char __user *buf, size_t count, loff_t *pos)
+static ssize_t completion_read(struct file *filp, char __user *buf,
+			       size_t count, loff_t *pos)
 {
 	struct completion_dev *dev = filp->private_data;
 
 	pr_debug("%s() is invoked\n", __FUNCTION__);
 
-	pr_debug("process %d(%s) is going to sleep\n", current->pid, current->comm);
+	pr_debug("process %d(%s) is going to sleep\n", current->pid,
+		 current->comm);
 	wait_for_completion(&dev->completion);
 	pr_debug("awoken %d(%s)\n", current->pid, current->comm);
 
 	return 0;
 }
 
-static
-ssize_t completion_write(struct file *filp, const char __user *buf, size_t count,
-		       loff_t *pos)
+static ssize_t completion_write(struct file *filp, const char __user *buf,
+				size_t count, loff_t *pos)
 {
 	struct completion_dev *dev = filp->private_data;
 
 	pr_debug("%s() is invoked\n", __FUNCTION__);
 
-	pr_debug("process %d(%s) awakening the readers...\n",
-	       current->pid, current->comm);
+	pr_debug("process %d(%s) awakening the readers...\n", current->pid,
+		 current->comm);
 	complete(&dev->completion);
 
 	return count;
@@ -55,13 +54,12 @@ ssize_t completion_write(struct file *filp, const char __user *buf, size_t count
 
 static struct file_operations completion_fops = {
 	.owner = THIS_MODULE,
-	.open  = completion_open, 
-	.read  = completion_read,
+	.open = completion_open,
+	.read = completion_read,
 	.write = completion_write,
 };
 
-static
-int __init m_init(void)
+static int __init m_init(void)
 {
 	int err = 0;
 	dev_t devno;
@@ -89,8 +87,7 @@ int __init m_init(void)
 	return 0;
 }
 
-static
-void __exit m_exit(void)
+static void __exit m_exit(void)
 {
 	dev_t devno;
 

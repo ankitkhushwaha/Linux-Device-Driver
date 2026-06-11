@@ -5,9 +5,9 @@
 #include <linux/fs.h>
 #include "lddbus.h"
 
-#define MODULE_NAME		"sculld"
-#define SCULLD_DEV_NR		1
-#define DEVNAME_LEN		20
+#define MODULE_NAME "sculld"
+#define SCULLD_DEV_NR 1
+#define DEVNAME_LEN 20
 
 struct sculld_dev {
 	struct cdev cdev;

@@ -15,13 +15,14 @@ int ioctl_open(struct inode *inode, struct file *filp)
 {
 	pr_debug("%s() is invoked\n", __FUNCTION__);
 
-	filp->private_data = container_of(inode->i_cdev, struct ioctl_dev, cdev);
+	filp->private_data =
+		container_of(inode->i_cdev, struct ioctl_dev, cdev);
 
 	return 0;
 }
 
 ssize_t ioctl_read(struct file *filp, char __user *buff, size_t count,
-	loff_t *f_pos)
+		   loff_t *f_pos)
 {
 	int retval = 0;
 	int howmany = 0, offset = 0;
@@ -35,7 +36,8 @@ ssize_t ioctl_read(struct file *filp, char __user *buff, size_t count,
 	howmany = *f_pos / ioctl_dev->buf_len;
 	offset = *f_pos % ioctl_dev->buf_len;
 
-	pr_debug("howmany = %d, offset=%d, many=%d\n", howmany, offset, ioctl_dev->howmany);
+	pr_debug("howmany = %d, offset=%d, many=%d\n", howmany, offset,
+		 ioctl_dev->howmany);
 
 	if (howmany >= ioctl_dev->howmany)
 		return 0;
@@ -53,8 +55,7 @@ ssize_t ioctl_read(struct file *filp, char __user *buff, size_t count,
 	return count;
 }
 
-static
-int ioctl_reset(struct ioctl_dev *dev)
+static int ioctl_reset(struct ioctl_dev *dev)
 {
 	dev->howmany = DEFAULT_HOWMANY;
 	dev->buf_len = 0;
@@ -64,15 +65,14 @@ int ioctl_reset(struct ioctl_dev *dev)
 	return 0;
 }
 
-static
-int ioctl_howmany(struct ioctl_dev *dev, unsigned long arg)
+static int ioctl_howmany(struct ioctl_dev *dev, unsigned long arg)
 {
 	int retval = 0;
 
 	//permission check
 	if (!capable(CAP_SYS_ADMIN))
 		return -EPERM;
-	
+
 	retval = dev->howmany;
 	dev->howmany = arg;
 	pr_debug("set howmany = %d\n", dev->howmany);
@@ -80,8 +80,7 @@ int ioctl_howmany(struct ioctl_dev *dev, unsigned long arg)
 	return retval;
 }
 
-static
-int ioctl_message(struct ioctl_dev *dev, void __user *arg)
+static int ioctl_message(struct ioctl_dev *dev, void __user *arg)
 {
 	int retval = 0;
 	struct ioctl_msg_arg msg_arg;
@@ -93,11 +92,13 @@ int ioctl_message(struct ioctl_dev *dev, void __user *arg)
 	}
 
 	if (msg_arg.len > BUFF_SIZE) {
-		pr_debug("message length (%d bytes) exceeds the limit\n", msg_arg.len);
+		pr_debug("message length (%d bytes) exceeds the limit\n",
+			 msg_arg.len);
 		return -ENOMEM;
 	}
 
-	if (copy_from_user(dev->buff, (void __user *)msg_arg.msg, msg_arg.len)) {
+	if (copy_from_user(dev->buff, (void __user *)msg_arg.msg,
+			   msg_arg.len)) {
 		pr_debug("copy message from user error\n");
 		retval = -EFAULT;
 		return retval;
@@ -147,6 +148,4 @@ long ioctl_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 	}
 
 	return retval;
-
 }
-

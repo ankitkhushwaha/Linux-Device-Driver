@@ -15,14 +15,13 @@ struct rb_root _root = RB_ROOT;
 /*
  * Have to manually implement this insert function
  */
-static
-void insert(struct rb_root *root, struct rb_data *new)
+static void insert(struct rb_root *root, struct rb_data *new)
 {
 	int new_key = new->key;
 	struct rb_node **link = &root->rb_node, *parent = NULL;
 	struct rb_data *data;
 
-	while(*link) {
+	while (*link) {
 		parent = *link;
 		data = rb_entry(parent, struct rb_data, rb);
 
@@ -32,7 +31,6 @@ void insert(struct rb_root *root, struct rb_data *new)
 			link = &(*link)->rb_left;
 		else
 			return;
-
 	}
 
 	rb_link_node(&new->rb, parent, link);
@@ -42,8 +40,7 @@ void insert(struct rb_root *root, struct rb_data *new)
 /*
  * Have to manually impelement this search function
  */
-static
-struct rb_data *search(struct rb_root *root, int target)
+static struct rb_data *search(struct rb_root *root, int target)
 {
 	struct rb_node *node;
 	struct rb_data *data;
@@ -67,11 +64,10 @@ struct rb_data *search(struct rb_root *root, int target)
 	return NULL;
 }
 
-static
-void dump_tree(struct rb_root *root, const char *str)
+static void dump_tree(struct rb_root *root, const char *str)
 {
 	struct rb_data *cur, *tmp;
-	
+
 	pr_info("======= %s ========\n", str);
 	pr_info("======= root: %d  ========\n",
 		rb_entry(root->rb_node, struct rb_data, rb)->val);
@@ -82,11 +78,10 @@ void dump_tree(struct rb_root *root, const char *str)
 	pr_info("--------------------\n");
 }
 
-static
-void destroy_tree(struct rb_root *root)
+static void destroy_tree(struct rb_root *root)
 {
 	struct rb_data *cur, *tmp;
-	
+
 	pr_info("======= Destroying ========\n");
 	pr_info("======= root: %d  ========\n",
 		rb_entry(root->rb_node, struct rb_data, rb)->val);
@@ -98,9 +93,7 @@ void destroy_tree(struct rb_root *root)
 	pr_info("--------------------\n");
 }
 
-
-static
-void insert_arr(struct rb_root *root, int arr[][2], int len)
+static void insert_arr(struct rb_root *root, int arr[][2], int len)
 {
 	int i;
 	struct rb_data *data;
@@ -113,13 +106,15 @@ void insert_arr(struct rb_root *root, int arr[][2], int len)
 	}
 }
 
-static
-int __init mod_init(void)
+static int __init mod_init(void)
 {
 	struct rb_root *root = &_root;
 	struct rb_data *data, *old, *new;
-	int nums0[][2] = { {1,1}, {2,2}, {3,3}, {4,4}, {5,5}, {6,6} };
-	int nums1[][2] = { {7,7}, {8,8} ,{9,9}, {10,10}, {11,11} };
+	int nums0[][2] = { { 1, 1 }, { 2, 2 }, { 3, 3 },
+			   { 4, 4 }, { 5, 5 }, { 6, 6 } };
+	int nums1[][2] = {
+		{ 7, 7 }, { 8, 8 }, { 9, 9 }, { 10, 10 }, { 11, 11 }
+	};
 
 	pr_info("Hello, world!\n");
 
@@ -132,19 +127,18 @@ int __init mod_init(void)
 	pr_info("Search for key 100\n");
 	data = search(root, 100);
 	if (data)
-		pr_info("Search result: key: %d, val: %d\n",
-			data->key, data->val);
+		pr_info("Search result: key: %d, val: %d\n", data->key,
+			data->val);
 	else
 		pr_info("Search result: NULL\n");
 
 	pr_info("Search for key == 2\n");
 	data = search(root, 2);
 	if (data)
-		pr_info("Search result: key: %d, val: %d\n",
-			data->key, data->val);
+		pr_info("Search result: key: %d, val: %d\n", data->key,
+			data->val);
 	else
 		pr_info("Search result: NULL\n");
-
 
 	pr_info("Update val of data with key == 2 to 100\n");
 	old = data;
@@ -158,11 +152,10 @@ int __init mod_init(void)
 	pr_info("Search for key == 2, after replacing\n");
 	data = search(root, 2);
 	if (data)
-		pr_info("Search result: key: %d, val: %d\n",
-			data->key, data->val);
+		pr_info("Search result: key: %d, val: %d\n", data->key,
+			data->val);
 	else
 		pr_info("Search result: NULL\n");
-
 
 	pr_info("delete key == 2 from tree\n");
 	rb_erase(&new->rb, root);
@@ -170,12 +163,11 @@ int __init mod_init(void)
 	pr_info("Search for key == 2, after erasing\n");
 	data = search(root, 2);
 	if (data)
-		pr_info("Search result: key: %d, val: %d\n",
-			data->key, data->val);
+		pr_info("Search result: key: %d, val: %d\n", data->key,
+			data->val);
 	else
 		pr_info("Search result: NULL\n");
 	dump_tree(root, "dump tree after erasing");
-
 
 	pr_info("Destroy the tree\n");
 	destroy_tree(root);
@@ -185,8 +177,7 @@ int __init mod_init(void)
 	return 0;
 }
 
-static
-void __exit mod_exit(void)
+static void __exit mod_exit(void)
 {
 	pr_info("Bye, World!\n");
 }

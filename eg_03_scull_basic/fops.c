@@ -51,7 +51,7 @@ ssize_t scull_read(struct file *filp, char __user *buff, size_t count,
 	toffset = *f_pos % SCULL_BLOCK_SIZE;
 
 	if (mutex_lock_interruptible(&dev->mutex))
-	    return -ERESTARTSYS;
+		return -ERESTARTSYS;
 
 	if (tblock + 1 > dev->block_counter) {
 		retval = 0;
@@ -83,7 +83,7 @@ ssize_t scull_read(struct file *filp, char __user *buff, size_t count,
 end_of_file:
 cpy_user_error:
 	pr_debug("RD pos = %lld, block = %lld, offset = %lld, read %lu bytes\n",
-	       *f_pos, tblock, toffset, count);
+		 *f_pos, tblock, toffset, count);
 
 	mutex_unlock(&dev->mutex);
 	return retval;
@@ -116,7 +116,8 @@ ssize_t scull_write(struct file *filp, const char __user *buff, size_t count,
 		list_add_tail(&pblock->block_list, &dev->block_list);
 		dev->block_counter++;
 	}
-	pblock = list_last_entry(&dev->block_list, struct scull_block, block_list);
+	pblock = list_last_entry(&dev->block_list, struct scull_block,
+				 block_list);
 
 	if (count > SCULL_BLOCK_SIZE - toffset)
 		count = SCULL_BLOCK_SIZE - toffset;
@@ -125,15 +126,16 @@ ssize_t scull_write(struct file *filp, const char __user *buff, size_t count,
 		retval = -EFAULT;
 		goto cpy_user_error;
 	}
-	
+
 	retval = count;
 	pblock->offset += count;
 	*f_pos += count;
 
 malloc_error:
 cpy_user_error:
-	pr_debug("WR pos = %lld, block = %lld, offset = %lld, write %lu bytes\n",
-	       *f_pos, tblock, toffset, count);
+	pr_debug(
+		"WR pos = %lld, block = %lld, offset = %lld, write %lu bytes\n",
+		*f_pos, tblock, toffset, count);
 
 	mutex_unlock(&dev->mutex);
 	return retval;
@@ -152,4 +154,3 @@ void scull_trim(struct scull_dev *dev)
 	}
 	dev->block_counter = 0;
 }
-

@@ -6,14 +6,14 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define DEV_FILE		"/dev/ioctl"
+#define DEV_FILE "/dev/ioctl"
 
-#define NEW_MSG			"Hello, Linux!!\n"
+#define NEW_MSG "Hello, Linux!!\n"
 
-#define IOCTL_IOC_MAGIC		'd'
-#define IOCTL_RESET		_IO(IOCTL_IOC_MAGIC, 0)
-#define IOCTL_HOWMANY		_IOWR(IOCTL_IOC_MAGIC, 1, int)
-#define IOCTL_MESSAGE		_IOW(IOCTL_IOC_MAGIC, 2, int)
+#define IOCTL_IOC_MAGIC 'd'
+#define IOCTL_RESET _IO(IOCTL_IOC_MAGIC, 0)
+#define IOCTL_HOWMANY _IOWR(IOCTL_IOC_MAGIC, 1, int)
+#define IOCTL_MESSAGE _IOW(IOCTL_IOC_MAGIC, 2, int)
 
 struct ioctl_msg_arg {
 	int len;
@@ -24,10 +24,7 @@ int main(int argc, char *argv[])
 {
 	char *msg = NEW_MSG;
 
-	struct ioctl_msg_arg msg_arg = {
-		.len = sizeof(NEW_MSG),
-		.msg = msg
-	};
+	struct ioctl_msg_arg msg_arg = { .len = sizeof(NEW_MSG), .msg = msg };
 
 	int fd = open(DEV_FILE, O_RDONLY);
 
@@ -37,5 +34,5 @@ int main(int argc, char *argv[])
 
 	printf("retval = %d\n", err);
 
-	return 0;	
+	return 0;
 }

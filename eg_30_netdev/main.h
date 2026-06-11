@@ -1,16 +1,16 @@
 #ifndef _MAIN_H
 #define _MAIN_H
 
-#define MODULE_NAME			"netdev"
+#define MODULE_NAME "netdev"
 
-#define NETDEV_RX_INTR			0x0001
-#define NETDEV_TX_INTR			0x0002
-#define NETDEV_TIMEOUT			5
+#define NETDEV_RX_INTR 0x0001
+#define NETDEV_TX_INTR 0x0002
+#define NETDEV_TIMEOUT 5
 
 struct ldd_packet {
 	struct ldd_packet *next;
 	struct net_device *dev;
-	int	datalen;
+	int datalen;
 	u8 data[ETH_DATA_LEN];
 };
 

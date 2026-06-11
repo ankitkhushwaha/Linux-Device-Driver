@@ -1,11 +1,11 @@
 #ifndef _MAIN_H
 #define _MAIN_H
 
-#define MODULE_NAME		"poll"
-#define POLL_DEV_NR		1
-#define BUFF_SIZE		PAGE_SIZE
-#define TIMER_INTERVAL		HZ
-#define DFT_MSG			"Hello World!"
+#define MODULE_NAME "poll"
+#define POLL_DEV_NR 1
+#define BUFF_SIZE PAGE_SIZE
+#define TIMER_INTERVAL HZ
+#define DFT_MSG "Hello World!"
 
 struct poll_dev {
 	struct cdev cdev;
