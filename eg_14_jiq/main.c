@@ -3,13 +3,12 @@
 #include <linux/moduleparam.h>
 #include <linux/init.h>
 
-
 #include <linux/fs.h>
 #include <linux/proc_fs.h>
 #include <linux/seq_file.h>
 #include <linux/slab.h>
 #include <linux/sched.h>
-#include <linux/errno.h>  /* error codes */
+#include <linux/errno.h> /* error codes */
 #include <linux/workqueue.h>
 #include <linux/preempt.h>
 #include <linux/interrupt.h> /* tasklets */
@@ -23,19 +22,19 @@ static struct jiq_dev *jiq_dev = NULL;
 
 static int jiq_print(struct jiq_dev *dev)
 {
-	int  len = dev->len;
+	int len = dev->len;
 	char *buf = dev->buf;
 	unsigned long j = jiffies;
 
 	pr_debug("%s() is invoked\n", __FUNCTION__);
 
 	if (len == 0)
-		len = sprintf(buf,"    time  delta preempt   pid cpu command\n");
+		len = sprintf(buf,
+			      "    time  delta preempt   pid cpu command\n");
 
-	len += sprintf(buf + len, "%9li  %4li     %3i %5i %3i %s\n",
-		       j, j - dev->jiffies,
-		       preempt_count(), current->pid, smp_processor_id(),
-		       current->comm);
+	len += sprintf(buf + len, "%9li  %4li     %3i %5i %3i %s\n", j,
+		       j - dev->jiffies, preempt_count(), current->pid,
+		       smp_processor_id(), current->comm);
 
 	if (len > BUF_LEN) {
 		pr_debug("len = %d\n", len);
@@ -49,10 +48,10 @@ static int jiq_print(struct jiq_dev *dev)
 	return 1;
 }
 
-static
-void jiq_print_wq_delayd(struct work_struct *work)
+static void jiq_print_wq_delayd(struct work_struct *work)
 {
-	struct jiq_dev *dev = container_of(work, struct jiq_dev, jiq_work_delay.work);
+	struct jiq_dev *dev =
+		container_of(work, struct jiq_dev, jiq_work_delay.work);
 
 	pr_debug("%s() is invoked\n", __FUNCTION__);
 
@@ -62,8 +61,7 @@ void jiq_print_wq_delayd(struct work_struct *work)
 	schedule_delayed_work(&dev->jiq_work_delay, dev->delay);
 }
 
-static
-void jiq_print_wq(struct work_struct *work)
+static void jiq_print_wq(struct work_struct *work)
 {
 	struct jiq_dev *dev = container_of(work, struct jiq_dev, jiq_work);
 
@@ -75,13 +73,12 @@ void jiq_print_wq(struct work_struct *work)
 	schedule_work(&dev->jiq_work);
 }
 
-static
-int jiq_read_wq_delayed(struct seq_file *m, void *v)
+static int jiq_read_wq_delayed(struct seq_file *m, void *v)
 {
 	DEFINE_WAIT(wait);
 
 	pr_debug("%s() is invoked\n", __FUNCTION__);
-	
+
 	jiq_dev->len = 0;
 	memset(jiq_dev->buf, 0, BUF_LEN);
 	jiq_dev->jiffies = jiffies;
@@ -97,8 +94,7 @@ int jiq_read_wq_delayed(struct seq_file *m, void *v)
 	return 0;
 }
 
-static
-int jiq_read_wq(struct seq_file *m, void *v)
+static int jiq_read_wq(struct seq_file *m, void *v)
 {
 	DEFINE_WAIT(wait);
 
@@ -122,27 +118,25 @@ int jiq_read_wq(struct seq_file *m, void *v)
 /*
  * Call jiq_print from a timer
  */
-static
-void jiq_timedout(struct timer_list *t)
+static void jiq_timedout(struct timer_list *t)
 {
 	struct jiq_dev *dev = from_timer(dev, t, timer);
 
 	pr_debug("%s() is invoked\n", __FUNCTION__);
 
-	jiq_print(dev);            /* print a line */
+	jiq_print(dev); /* print a line */
 
 	dev->timeout = 1;
-	wake_up_interruptible(&dev->jiq_wait);  /* awake the process */
+	wake_up_interruptible(&dev->jiq_wait); /* awake the process */
 }
 
-static
-int jiq_read_run_timer(struct seq_file *m, void *v)
+static int jiq_read_run_timer(struct seq_file *m, void *v)
 {
 	pr_debug("%s() is invoked\n", __FUNCTION__);
 
 	jiq_dev->len = 0;
 	memset(jiq_dev->buf, 0, BUF_LEN);
-	jiq_dev->jiffies  =jiffies;
+	jiq_dev->jiffies = jiffies;
 
 	timer_setup(&jiq_dev->timer, jiq_timedout, 0);
 	jiq_dev->timer.expires = jiffies + HZ;
@@ -162,10 +156,9 @@ int jiq_read_run_timer(struct seq_file *m, void *v)
 /*
  * Call jiq_print from a tasklet
  */
-static
-void jiq_print_tasklet(unsigned long ptr)
+static void jiq_print_tasklet(unsigned long ptr)
 {
-	struct jiq_dev *dev = (struct jiq_dev*) ptr;
+	struct jiq_dev *dev = (struct jiq_dev *)ptr;
 
 	pr_debug("%s() is invoked\n", __FUNCTION__);
 
@@ -175,15 +168,14 @@ void jiq_print_tasklet(unsigned long ptr)
 	}
 
 	dev->timeout = 1;
-	wake_up_interruptible(&dev->jiq_wait);  /* awake the process */
+	wake_up_interruptible(&dev->jiq_wait); /* awake the process */
 }
 
-static
-int jiq_read_tasklet(struct seq_file *m, void *v)
+static int jiq_read_tasklet(struct seq_file *m, void *v)
 {
 	jiq_dev->len = 0;
 	memset(jiq_dev->buf, 0, BUF_LEN);
-	jiq_dev->jiffies  =jiffies;
+	jiq_dev->jiffies = jiffies;
 
 	tasklet_init(&jiq_dev->tlet, jiq_print_tasklet, (unsigned long)jiq_dev);
 
@@ -196,28 +188,25 @@ int jiq_read_tasklet(struct seq_file *m, void *v)
 	return 0;
 }
 
-static
-int proc_open(struct inode *inode, struct file *filp)
+static int proc_open(struct inode *inode, struct file *filp)
 {
 	int (*show)(struct seq_file *m, void *v) = PDE_DATA(inode);
 	return single_open(filp, show, NULL);
 }
 
-static
-int proc_release(struct inode *inode, struct file *filp)
+static int proc_release(struct inode *inode, struct file *filp)
 {
 	return single_release(inode, filp);
 }
 
 static struct proc_ops proc_ops = {
-	.proc_open    = proc_open,
-	.proc_read    = seq_read,
-	.proc_lseek   = seq_lseek,
+	.proc_open = proc_open,
+	.proc_read = seq_read,
+	.proc_lseek = seq_lseek,
 	.proc_release = proc_release,
 };
 
-static
-int m_init(void)
+static int m_init(void)
 {
 	jiq_dev = kmalloc(sizeof(struct jiq_dev), GFP_KERNEL);
 
@@ -236,8 +225,7 @@ int m_init(void)
 	return 0;
 }
 
-static
-void m_exit(void)
+static void m_exit(void)
 {
 	printk(KERN_WARNING MODULE_NAME " unloaded\n");
 

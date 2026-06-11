@@ -5,15 +5,14 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#define DEV_PATH		"/dev/usb_skel"
+#define DEV_PATH "/dev/usb_skel"
 
-#define BUF_LEN			1024
+#define BUF_LEN 1024
 
-char buff[1024] = {0};
+char buff[1024] = { 0 };
 
 int main(void)
 {
-	
 	int fd = open(DEV_PATH, O_RDWR);
 	if (fd < 0) {
 		printf("open %s error\n", DEV_PATH);
@@ -36,11 +35,9 @@ int main(void)
 			read(pollfd.fd, buff, BUF_LEN);
 			printf("[%d] read: %s\n", pollfd.fd, buff);
 		}
-
 	}
 
 	close(fd);
 
 	return 0;
 }
-

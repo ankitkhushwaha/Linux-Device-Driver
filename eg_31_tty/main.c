@@ -8,8 +8,8 @@
 
 #include "main.h"
 
-static struct tty_driver	*ldd_tty_driver;
-static struct ldd_tty_dev	*ldd_dev_table;
+static struct tty_driver *ldd_tty_driver;
+static struct ldd_tty_dev *ldd_dev_table;
 
 static void ldd_tty_timer_func(struct timer_list *t)
 {
@@ -28,7 +28,7 @@ static void ldd_tty_timer_func(struct timer_list *t)
 	for (i = 0; i < data_size; ++i) {
 		// tty_insert_flip_char() will check room, we needn't do it here.
 		// if (!tty_buffer_request_room(port, 1))
-			// tty_flip_buffer_push(port);
+		// tty_flip_buffer_push(port);
 		rv = tty_insert_flip_char(port, data[0], TTY_NORMAL);
 	}
 	tty_flip_buffer_push(port);
@@ -46,8 +46,7 @@ static int ldd_tty_open(struct tty_struct *tty, struct file *filp)
 	idx = tty->index;
 	ldd_dev = ldd_dev_table + idx;
 	spin_lock_irqsave(&ldd_dev->spinlock, flags);
-	
-	
+
 	if (ldd_dev->open_count == 0) {
 		rv = tty_port_open(&ldd_dev->port, tty, filp);
 		if (rv) {
@@ -110,8 +109,8 @@ static void ldd_tty_flush(struct ldd_tty_dev *ldd_dev)
 	}
 }
 
-static int ldd_tty_printk(struct ldd_tty_dev *ldd_dev,
-			  const unsigned char *buf, int count)
+static int ldd_tty_printk(struct ldd_tty_dev *ldd_dev, const unsigned char *buf,
+			  int count)
 {
 	int i = ldd_dev->buffer_curr;
 
@@ -150,8 +149,8 @@ static int ldd_tty_printk(struct ldd_tty_dev *ldd_dev,
  * If you really want to sleep, make sure to check first whether the driver is
  * in interrupt context by calling in_interrupt().
  */
-static int ldd_tty_write(struct tty_struct *tty,
-		     const unsigned char *buf, int count)
+static int ldd_tty_write(struct tty_struct *tty, const unsigned char *buf,
+			 int count)
 {
 	int rv;
 	unsigned long flags;
@@ -181,7 +180,7 @@ static int ldd_tty_write_room(struct tty_struct *tty)
 	return rv;
 }
 
-#define INTEREST_IFLAGS		(IGNBRK|BRKINT|IGNPAR|PARMRK|INPCK)
+#define INTEREST_IFLAGS (IGNBRK | BRKINT | IGNPAR | PARMRK | INPCK)
 
 static void ldd_tty_set_termios(struct tty_struct *tty,
 				struct ktermios *old_termios)
@@ -192,11 +191,9 @@ static void ldd_tty_set_termios(struct tty_struct *tty,
 	pr_info("set_termios...\n");
 
 	/* check that they really want us to change something */
-	if (old_termios && 
-	    (cflag == old_termios->c_cflag) &&
-	    ( (tty->termios.c_iflag & INTEREST_IFLAGS) == 
-	      (old_termios->c_iflag & INTEREST_IFLAGS) )
-	   ) {
+	if (old_termios && (cflag == old_termios->c_cflag) &&
+	    ((tty->termios.c_iflag & INTEREST_IFLAGS) ==
+	     (old_termios->c_iflag & INTEREST_IFLAGS))) {
 		pr_info(" - nothing to change...\n");
 		return;
 	}
@@ -243,20 +240,22 @@ static void ldd_tty_set_termios(struct tty_struct *tty,
 	/* if we are implementing XON/XOFF, set the start and
 	 * stop character in the device */
 	if (I_IXOFF(tty) || I_IXON(tty)) {
-		unsigned char stop_char  = STOP_CHAR(tty);
+		unsigned char stop_char = STOP_CHAR(tty);
 		unsigned char start_char = START_CHAR(tty);
 
 		/* if we are implementing INBOUND XON/XOFF */
 		if (I_IXOFF(tty))
 			pr_debug(" - INBOUND XON/XOFF is enabled, "
-				 "XON = %2x, XOFF = %2x", start_char, stop_char);
+				 "XON = %2x, XOFF = %2x",
+				 start_char, stop_char);
 		else
 			pr_debug(" - INBOUND XON/XOFF is disabled");
 
 		/* if we are implementing OUTBOUND XON/XOFF */
 		if (I_IXON(tty))
 			pr_debug(" - OUTBOUND XON/XOFF is enabled, "
-				 "XON = %2x, XOFF = %2x", start_char, stop_char);
+				 "XON = %2x, XOFF = %2x",
+				 start_char, stop_char);
 		else
 			pr_debug(" - OUTBOUND XON/XOFF is disabled");
 	}
@@ -265,13 +264,13 @@ static void ldd_tty_set_termios(struct tty_struct *tty,
 	pr_debug(" - baud rate = %d", tty_get_baud_rate(tty));
 }
 
-#define MCR_DTR		0x01
-#define MCR_RTS		0x02
-#define MCR_LOOP	0x04
-#define MSR_CTS		0x08
-#define MSR_CD		0x10
-#define MSR_RI		0x20
-#define MSR_DSR		0x40
+#define MCR_DTR 0x01
+#define MCR_RTS 0x02
+#define MCR_LOOP 0x04
+#define MSR_CTS 0x08
+#define MSR_CD 0x10
+#define MSR_RI 0x20
+#define MSR_DSR 0x40
 
 static int ldd_tty_tiocmget(struct tty_struct *tty)
 {
@@ -281,13 +280,13 @@ static int ldd_tty_tiocmget(struct tty_struct *tty)
 	unsigned int msr = ldd_dev->msr;
 	unsigned int mcr = ldd_dev->mcr;
 
-	result = ((mcr & MCR_DTR)  ? TIOCM_DTR  : 0) |	/* DTR is set */
-		 ((mcr & MCR_RTS)  ? TIOCM_RTS  : 0) |	/* RTS is set */
-		 ((mcr & MCR_LOOP) ? TIOCM_LOOP : 0) |	/* LOOP is set */
-		 ((msr & MSR_CTS)  ? TIOCM_CTS  : 0) |	/* CTS is set */
-		 ((msr & MSR_CD)   ? TIOCM_CAR  : 0) |	/* Carrier detect is set*/
-		 ((msr & MSR_RI)   ? TIOCM_RI   : 0) |	/* Ring Indicator is set */
-		 ((msr & MSR_DSR)  ? TIOCM_DSR  : 0);	/* DSR is set */
+	result = ((mcr & MCR_DTR) ? TIOCM_DTR : 0) | /* DTR is set */
+		 ((mcr & MCR_RTS) ? TIOCM_RTS : 0) | /* RTS is set */
+		 ((mcr & MCR_LOOP) ? TIOCM_LOOP : 0) | /* LOOP is set */
+		 ((msr & MSR_CTS) ? TIOCM_CTS : 0) | /* CTS is set */
+		 ((msr & MSR_CD) ? TIOCM_CAR : 0) | /* Carrier detect is set*/
+		 ((msr & MSR_RI) ? TIOCM_RI : 0) | /* Ring Indicator is set */
+		 ((msr & MSR_DSR) ? TIOCM_DSR : 0); /* DSR is set */
 
 	return result;
 }
@@ -342,21 +341,20 @@ static int ldd_tty_ioctl(struct tty_struct *tty, unsigned int cmd,
 }
 
 static const struct tty_operations tty_ops = {
-	.open		= ldd_tty_open,
-	.close		= ldd_tty_close,
-	.write		= ldd_tty_write,
-	.write_room	= ldd_tty_write_room,
-	.set_termios	= ldd_tty_set_termios,
-	.tiocmget	= ldd_tty_tiocmget,
-	.tiocmset	= ldd_tty_tiocmset,
-	.proc_show	= ldd_tty_proc_show,
-	.ioctl		= ldd_tty_ioctl,
+	.open = ldd_tty_open,
+	.close = ldd_tty_close,
+	.write = ldd_tty_write,
+	.write_room = ldd_tty_write_room,
+	.set_termios = ldd_tty_set_termios,
+	.tiocmget = ldd_tty_tiocmget,
+	.tiocmset = ldd_tty_tiocmset,
+	.proc_show = ldd_tty_proc_show,
+	.ioctl = ldd_tty_ioctl,
 };
 
-static const struct tty_port_operations null_ops = { };
+static const struct tty_port_operations null_ops = {};
 
-static
-int __init m_init(void)
+static int __init m_init(void)
 {
 	int rv = -ENOMEM, i;
 
@@ -364,14 +362,14 @@ int __init m_init(void)
 	 * alloc_tty_driver is deprecated
 	 */
 	// ldd_tty_driver = alloc_tty_driver(LDD_TTY_MINOR_NR);
-	ldd_tty_driver = tty_alloc_driver(LDD_TTY_MINOR_NR,
-					  TTY_DRIVER_RESET_TERMIOS |
-					  TTY_DRIVER_REAL_RAW);
+	ldd_tty_driver =
+		tty_alloc_driver(LDD_TTY_MINOR_NR, TTY_DRIVER_RESET_TERMIOS |
+							   TTY_DRIVER_REAL_RAW);
 	if (IS_ERR(ldd_tty_driver))
 		return PTR_ERR(ldd_tty_driver);
 
-	ldd_dev_table = kcalloc(LDD_TTY_MINOR_NR,
-				sizeof(struct ldd_tty_dev), GFP_KERNEL);
+	ldd_dev_table = kcalloc(LDD_TTY_MINOR_NR, sizeof(struct ldd_tty_dev),
+				GFP_KERNEL);
 	if (!ldd_dev_table) {
 		put_tty_driver(ldd_tty_driver);
 		return -ENOMEM;
@@ -391,7 +389,8 @@ int __init m_init(void)
 	ldd_tty_driver->type = TTY_DRIVER_TYPE_SERIAL;
 	ldd_tty_driver->subtype = SERIAL_TYPE_NORMAL;
 	ldd_tty_driver->init_termios = tty_std_termios;
-	ldd_tty_driver->init_termios.c_cflag = B9600 | CS8 | CREAD | HUPCL | CLOCAL;
+	ldd_tty_driver->init_termios.c_cflag = B9600 | CS8 | CREAD | HUPCL |
+					       CLOCAL;
 
 	tty_set_operations(ldd_tty_driver, &tty_ops);
 
@@ -423,8 +422,7 @@ static void destroy_ldd_dev(struct ldd_tty_dev *ldd_dev)
 	spin_unlock_irqrestore(&ldd_dev->spinlock, flags);
 }
 
-static
-void __exit m_exit(void)
+static void __exit m_exit(void)
 {
 	int i;
 

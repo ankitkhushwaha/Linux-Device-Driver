@@ -22,7 +22,7 @@ int poll_open(struct inode *inode, struct file *filp)
 }
 
 ssize_t poll_read(struct file *filp, char __user *buff, size_t count,
-			  loff_t *f_pos)
+		  loff_t *f_pos)
 {
 	int retval;
 	struct poll_dev *dev = filp->private_data;
@@ -34,7 +34,7 @@ ssize_t poll_read(struct file *filp, char __user *buff, size_t count,
 
 	if (count > dev->buf_len - *f_pos)
 		count = dev->buf_len - *f_pos;
-	
+
 	if (copy_to_user(buff, dev->buff + *f_pos, count)) {
 		retval = -EFAULT;
 		goto cpy_user_error;
@@ -48,8 +48,8 @@ cpy_user_error:
 	return retval;
 }
 
-ssize_t poll_write(struct file *filp, const char __user *buff,
-			   size_t count, loff_t *f_pos)
+ssize_t poll_write(struct file *filp, const char __user *buff, size_t count,
+		   loff_t *f_pos)
 {
 	int retval;
 	struct poll_dev *dev = filp->private_data;

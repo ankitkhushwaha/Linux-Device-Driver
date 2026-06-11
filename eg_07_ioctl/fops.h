@@ -6,5 +6,4 @@ extern ssize_t ioctl_read(struct file *filp, char __user *buff, size_t count,
 			  loff_t *f_pos);
 extern long ioctl_ioctl(struct file *filp, unsigned int cmd, unsigned long arg);
 
-
 #endif

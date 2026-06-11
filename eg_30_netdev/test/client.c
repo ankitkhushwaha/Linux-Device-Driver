@@ -7,7 +7,6 @@
 
 #include <string.h>
 
-
 int main(int argc, char *argv[])
 {
 	int sk;
@@ -22,7 +21,8 @@ int main(int argc, char *argv[])
 
 	memset(&ifr, 0, sizeof(ifr));
 	strncpy(ifr.ifr_name, "sn1", 5);
-	if (setsockopt(sk, SOL_SOCKET, SO_BINDTODEVICE, (void*)(&ifr), sizeof(ifr)) < 0) {
+	if (setsockopt(sk, SOL_SOCKET, SO_BINDTODEVICE, (void *)(&ifr),
+		       sizeof(ifr)) < 0) {
 		perror("setsocket filed\n");
 		exit(1);
 	}
@@ -35,7 +35,8 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	if (connect(sk, (struct sockaddr*)(&serv_addr), sizeof(serv_addr)) < 0) {
+	if (connect(sk, (struct sockaddr *)(&serv_addr), sizeof(serv_addr)) <
+	    0) {
 		perror("Connect failed\n");
 		exit(1);
 	}

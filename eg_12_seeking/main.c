@@ -12,14 +12,13 @@ static int seeking_major = 0, seeking_minor = 0;
 static struct seeking_dev *seeking_dev = NULL;
 
 static struct file_operations fops = {
-	.owner  = THIS_MODULE,
-	.open   = seeking_open,
-	.read   = seeking_read,
+	.owner = THIS_MODULE,
+	.open = seeking_open,
+	.read = seeking_read,
 	.llseek = seeking_llseek,
 };
 
-static
-int __init m_init(void)
+static int __init m_init(void)
 {
 	dev_t devno;
 	int err = 0;
@@ -33,7 +32,8 @@ int __init m_init(void)
 	}
 	memset(seeking_dev, 0, sizeof(struct seeking_dev));
 
-	err = alloc_chrdev_region(&devno, seeking_minor, SEEKING_DEV_NR, MODULE_NAME);
+	err = alloc_chrdev_region(&devno, seeking_minor, SEEKING_DEV_NR,
+				  MODULE_NAME);
 	if (err < 0) {
 		pr_debug("Can't get major!\n");
 		goto on_error;
@@ -60,8 +60,7 @@ on_error:
 	return err;
 }
 
-static
-void __exit m_exit(void)
+static void __exit m_exit(void)
 {
 	dev_t devno;
 

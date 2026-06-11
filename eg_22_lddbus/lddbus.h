@@ -11,7 +11,6 @@
 extern struct bus_type ldd_bus_type;
 extern struct class *ldd_class;
 
-
 /*
  * The LDD driver type.
  */

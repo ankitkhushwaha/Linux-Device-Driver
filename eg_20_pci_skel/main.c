@@ -5,15 +5,19 @@
 
 #include "main.h"
 
-#define PCI_VENDOR_ID_QEMU		0x1234
-#define PCI_KMOD_EDU_VENDOR_ID		PCI_VENDOR_ID_QEMU
-#define PCI_KMOD_EDU_DEVICE_ID		0x7863
+#define PCI_VENDOR_ID_QEMU 0x1234
+#define PCI_KMOD_EDU_VENDOR_ID PCI_VENDOR_ID_QEMU
+#define PCI_KMOD_EDU_DEVICE_ID 0x7863
 
-#define PCI_KMOD_EDU_BAR_NUM		6
+#define PCI_KMOD_EDU_BAR_NUM 6
 
 static struct pci_device_id ids[] = {
-	{ PCI_DEVICE(PCI_KMOD_EDU_VENDOR_ID, PCI_KMOD_EDU_DEVICE_ID), },
-	{ 0, }
+	{
+		PCI_DEVICE(PCI_KMOD_EDU_VENDOR_ID, PCI_KMOD_EDU_DEVICE_ID),
+	},
+	{
+		0,
+	}
 };
 MODULE_DEVICE_TABLE(pci, ids);
 
@@ -83,8 +87,8 @@ static int probe(struct pci_dev *dev, const struct pci_device_id *id)
 	if (pci_find_capability(dev, PCI_CAP_ID_EXP)) {
 		pr_debug("CAP PCI_CAP_ID_EXP: on\n");
 		pcie_capability_read_word(dev, PCI_EXP_FLAGS, &cap);
-		pr_debug("PCI_EXP_FLAGS: %x, PCI_EXP_FLAGS_VERS=%d\n",
-			 cap, cap & PCI_EXP_FLAGS_VERS);
+		pr_debug("PCI_EXP_FLAGS: %x, PCI_EXP_FLAGS_VERS=%d\n", cap,
+			 cap & PCI_EXP_FLAGS_VERS);
 	} else {
 		pr_debug("CAP PCI_CAP_ID_EXP: off\n");
 	}
@@ -100,28 +104,24 @@ static int probe(struct pci_dev *dev, const struct pci_device_id *id)
 
 static void remove(struct pci_dev *dev)
 {
-
 }
 
 static struct pci_driver pci_driver = {
-	.name		= MODULE_NAME,
-	.id_table	= ids,
-	.probe		= probe,
-	.remove		= remove,
+	.name = MODULE_NAME,
+	.id_table = ids,
+	.probe = probe,
+	.remove = remove,
 };
 
-static
-int __init m_init(void)
+static int __init m_init(void)
 {
 	return pci_register_driver(&pci_driver);
 }
 
-static
-void __exit m_exit(void)
+static void __exit m_exit(void)
 {
 	pci_unregister_driver(&pci_driver);
 }
-
 
 module_init(m_init);
 module_exit(m_exit);

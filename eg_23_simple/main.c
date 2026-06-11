@@ -13,16 +13,15 @@
 struct page *last_page = NULL;
 static unsigned long pfn;
 
-
 static int major;
 static struct cdev SimpleDevs[DEV_NR];
 void simple_vma_open(struct vm_area_struct *vma)
 {
 	size_t len = vma->vm_end - vma->vm_start;
-	pr_debug("vma_open -- vm_start: %#lx, vm_end: %#lx\n, len: %#lx, vm_pgoff: %#lx(%#lx), ops=%p\n",
-		 vma->vm_start, vma->vm_end, len,
-		 vma->vm_pgoff, vma->vm_pgoff << PAGE_SHIFT,
-		 vma->vm_ops);
+	pr_debug(
+		"vma_open -- vm_start: %#lx, vm_end: %#lx\n, len: %#lx, vm_pgoff: %#lx(%#lx), ops=%p\n",
+		vma->vm_start, vma->vm_end, len, vma->vm_pgoff,
+		vma->vm_pgoff << PAGE_SHIFT, vma->vm_ops);
 }
 
 void simple_vma_close(struct vm_area_struct *vma)
@@ -33,14 +32,14 @@ void simple_vma_close(struct vm_area_struct *vma)
 	last_page = pfn_to_page(pfn);
 	refc = atomic_read(&last_page->_refcount);
 	pr_debug("pfn = %lx, last page refc when close = %d\n", pfn, refc);
-	pr_debug("vma_close -- vm_start: %#lx, vm_end: %#lx\n, len: %#lx, vm_pgoff: %#lx(%#lx), ops=%p\n",
-		 vma->vm_start, vma->vm_end, len,
-		 vma->vm_pgoff, vma->vm_pgoff << PAGE_SHIFT,
-		 vma->vm_ops);
+	pr_debug(
+		"vma_close -- vm_start: %#lx, vm_end: %#lx\n, len: %#lx, vm_pgoff: %#lx(%#lx), ops=%p\n",
+		vma->vm_start, vma->vm_end, len, vma->vm_pgoff,
+		vma->vm_pgoff << PAGE_SHIFT, vma->vm_ops);
 }
 
 static struct vm_operations_struct simple_remap_vm_ops = {
-	.open =  simple_vma_open,
+	.open = simple_vma_open,
 	.close = simple_vma_close,
 };
 
@@ -68,16 +67,15 @@ static int simple_remap_mmap(struct file *filp, struct vm_area_struct *vma)
 		 (1 << get_order(len)) * PAGE_SIZE / 4);
 
 	rv = remap_pfn_range(vma, vma->vm_start, page_to_pfn(pages),
-			    vma->vm_end - vma->vm_start,
-			    vma->vm_page_prot);
+			     vma->vm_end - vma->vm_start, vma->vm_page_prot);
 	if (rv) {
 		return -EAGAIN;
 	}
 
-	pr_debug("vm_start: %#lx, vm_end: %#lx\n, len: %#lx, vm_pgoff: %#lx(%#lx), ops=%p\n",
-		 vma->vm_start, vma->vm_end, len,
-		 vma->vm_pgoff, vma->vm_pgoff << PAGE_SHIFT,
-		 vma->vm_ops);
+	pr_debug(
+		"vm_start: %#lx, vm_end: %#lx\n, len: %#lx, vm_pgoff: %#lx(%#lx), ops=%p\n",
+		vma->vm_start, vma->vm_end, len, vma->vm_pgoff,
+		vma->vm_pgoff << PAGE_SHIFT, vma->vm_ops);
 
 	vma->vm_ops = &simple_remap_vm_ops;
 	simple_vma_open(vma);
@@ -86,9 +84,9 @@ static int simple_remap_mmap(struct file *filp, struct vm_area_struct *vma)
 }
 
 static struct file_operations simple_remap_ops = {
-	.owner   = THIS_MODULE,
-	.open    = simple_open,
-	.mmap    = simple_remap_mmap,
+	.owner = THIS_MODULE,
+	.open = simple_open,
+	.mmap = simple_remap_mmap,
 };
 
 static vm_fault_t simple_vma_fault(struct vm_fault *vmf)
@@ -104,9 +102,9 @@ static vm_fault_t simple_vma_fault(struct vm_fault *vmf)
 }
 
 static struct vm_operations_struct simple_fault_vm_ops = {
-	.open	=  simple_vma_open,
-	.close	= simple_vma_close,
-	.fault	= simple_vma_fault,
+	.open = simple_vma_open,
+	.close = simple_vma_close,
+	.fault = simple_vma_fault,
 };
 
 static int simple_fault_mmap(struct file *filp, struct vm_area_struct *vma)
@@ -117,9 +115,9 @@ static int simple_fault_mmap(struct file *filp, struct vm_area_struct *vma)
 }
 
 static struct file_operations simple_fault_ops = {
-	.owner   = THIS_MODULE,
-	.open    = simple_open,
-	.mmap    = simple_fault_mmap,
+	.owner = THIS_MODULE,
+	.open = simple_open,
+	.mmap = simple_fault_mmap,
 };
 
 static void simple_setup_cdev(struct cdev *cdev, int minor,
@@ -133,8 +131,7 @@ static void simple_setup_cdev(struct cdev *cdev, int minor,
 		pr_notice("Error when adding simple%d\n", minor);
 }
 
-static
-int __init m_init(void)
+static int __init m_init(void)
 {
 	int result;
 	dev_t devno;
@@ -144,7 +141,6 @@ int __init m_init(void)
 #else
 	pr_debug("pte_index not defined!\n");
 #endif
-
 
 	result = alloc_chrdev_region(&devno, 0, DEV_NR, MODULE_NAME);
 	if (result < 0) {
@@ -159,14 +155,12 @@ int __init m_init(void)
 	return 0;
 }
 
-static
-void __exit m_exit(void)
+static void __exit m_exit(void)
 {
 	cdev_del(SimpleDevs + 0);
 	cdev_del(SimpleDevs + 1);
 	unregister_chrdev_region(MKDEV(major, 0), DEV_NR);
 }
-
 
 module_init(m_init);
 module_exit(m_exit);

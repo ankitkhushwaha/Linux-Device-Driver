@@ -6,12 +6,12 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#define DEV_FILE	"/dev/seeking"
+#define DEV_FILE "/dev/seeking"
 
 int main(void)
 {
 	int fd = -1;
-	char buff[2] = {0};
+	char buff[2] = { 0 };
 
 	if ((fd = open(DEV_FILE, O_RDONLY)) < 0) {
 		printf("error: %s\n", strerror(errno));
@@ -36,4 +36,3 @@ on_error:
 	close(fd);
 	return -1;
 }
-

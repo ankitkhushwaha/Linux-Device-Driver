@@ -17,12 +17,12 @@ int async_io_open(struct inode *inode, struct file *filp)
 {
 	pr_debug("%s() is invoked\n", __FUNCTION__);
 
-	filp->private_data = container_of(inode->i_cdev, struct async_io_dev, cdev);
+	filp->private_data =
+		container_of(inode->i_cdev, struct async_io_dev, cdev);
 	return 0;
 }
 
-static
-int async_io_release(struct inode *inode, struct file *filp)
+static int async_io_release(struct inode *inode, struct file *filp)
 {
 	// remove the async_queue from the file
 	// struct async_io_dev *dev = filp->private_data;
@@ -30,9 +30,8 @@ int async_io_release(struct inode *inode, struct file *filp)
 	return 0;
 }
 
-static
-ssize_t async_io_read(struct file *filp, char __user *buff,
-			  size_t count, loff_t *f_pos)
+static ssize_t async_io_read(struct file *filp, char __user *buff, size_t count,
+			     loff_t *f_pos)
 {
 	struct async_io_dev *dev = filp->private_data;
 	ssize_t len, ret;
@@ -65,9 +64,8 @@ out:
 	return ret;
 }
 
-static
-ssize_t async_io_write(struct file *filp, const char __user *buff,
-			   size_t count, loff_t *f_pos)
+static ssize_t async_io_write(struct file *filp, const char __user *buff,
+			      size_t count, loff_t *f_pos)
 {
 	struct async_io_dev *dev = filp->private_data;
 	ssize_t len, ret;
@@ -106,10 +104,10 @@ struct async_work {
 	struct iov_iter *tofrom;
 };
 
-static
-void async_do_deferred_op(struct work_struct *work)
+static void async_do_deferred_op(struct work_struct *work)
 {
-	struct async_work *stuff = container_of(work, struct async_work, work.work);
+	struct async_work *stuff =
+		container_of(work, struct async_work, work.work);
 	if (iov_iter_rw(stuff->tofrom) == WRITE) {
 		generic_file_write_iter(stuff->iocb, stuff->tofrom);
 	} else {
@@ -118,26 +116,24 @@ void async_do_deferred_op(struct work_struct *work)
 	kfree(stuff);
 }
 
-static
-int async_defer_op(struct kiocb *iocb, struct iov_iter *tofrom)
+static int async_defer_op(struct kiocb *iocb, struct iov_iter *tofrom)
 {
 	struct async_work *stuff;
 	int result;
 
 	/* Otherwise defer the completion for a few milliseconds. */
-	stuff = kmalloc (sizeof (*stuff), GFP_KERNEL);
+	stuff = kmalloc(sizeof(*stuff), GFP_KERNEL);
 	if (stuff == NULL)
 		return result; /* No memory, just complete now */
 
 	stuff->iocb = iocb;
 	INIT_DELAYED_WORK(&stuff->work, async_do_deferred_op);
-	schedule_delayed_work(&stuff->work, HZ/10000);
+	schedule_delayed_work(&stuff->work, HZ / 10000);
 
 	return -EIOCBQUEUED;
 }
 
-static
-ssize_t async_io_read_iter(struct kiocb *iocb, struct iov_iter *to)
+static ssize_t async_io_read_iter(struct kiocb *iocb, struct iov_iter *to)
 {
 	if (is_sync_kiocb(iocb))
 		return generic_file_read_iter(iocb, to);
@@ -145,8 +141,7 @@ ssize_t async_io_read_iter(struct kiocb *iocb, struct iov_iter *to)
 	return async_defer_op(iocb, to);
 }
 
-static
-ssize_t async_io_write_iter(struct kiocb *iocb, struct iov_iter *from)
+static ssize_t async_io_write_iter(struct kiocb *iocb, struct iov_iter *from)
 {
 	if (is_sync_kiocb(iocb))
 		return generic_file_write_iter(iocb, from);
@@ -155,23 +150,23 @@ ssize_t async_io_write_iter(struct kiocb *iocb, struct iov_iter *from)
 }
 
 static struct file_operations fops = {
-	.open	 = async_io_open,
+	.open = async_io_open,
 	.release = async_io_release,
-	.read    = async_io_read,
-	.write   = async_io_write,
-	.read_iter  = async_io_read_iter,
+	.read = async_io_read,
+	.write = async_io_write,
+	.read_iter = async_io_read_iter,
 	.write_iter = async_io_write_iter,
 };
 
-static
-int __init m_init(void)
+static int __init m_init(void)
 {
 	dev_t devno;
 	int i, err = 0;
 
 	pr_debug(MODULE_NAME " is loaded\n");
 
-	async_io_devs = kcalloc(DEV_NR, sizeof(struct async_io_dev), GFP_KERNEL);
+	async_io_devs =
+		kcalloc(DEV_NR, sizeof(struct async_io_dev), GFP_KERNEL);
 	if (!async_io_devs) {
 		pr_debug("Cannot alloc memory!\n");
 		return -ENOMEM;
@@ -207,8 +202,7 @@ err_major:
 	return err;
 }
 
-static
-void __exit m_exit(void)
+static void __exit m_exit(void)
 {
 	int i;
 	dev_t devno;
@@ -231,4 +225,3 @@ module_exit(m_exit);
 MODULE_AUTHOR("d0u9");
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("Asynchronous I/O");
-

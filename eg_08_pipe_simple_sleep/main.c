@@ -14,15 +14,12 @@
 static int pipe_major = 0, pipe_minor = 0;
 static struct pipe_dev *pipe_dev[PIPE_DEV_NR];
 
-static struct file_operations fops = {
-	.owner = THIS_MODULE,
-	.open  = pipe_open,
-	.read  = pipe_read,
-	.write = pipe_write
-};
+static struct file_operations fops = { .owner = THIS_MODULE,
+				       .open = pipe_open,
+				       .read = pipe_read,
+				       .write = pipe_write };
 
-static
-void __init init_pipe_dev(struct pipe_dev *dev)
+static void __init init_pipe_dev(struct pipe_dev *dev)
 {
 	memset(dev, 0, sizeof(struct pipe_dev));
 	mutex_init(&dev->mutex);
@@ -34,8 +31,7 @@ void __init init_pipe_dev(struct pipe_dev *dev)
 	init_waitqueue_head(&dev->wr_queue);
 }
 
-static
-int __init m_init(void)
+static int __init m_init(void)
 {
 	dev_t devno;
 	int err = 0;
@@ -52,7 +48,8 @@ int __init m_init(void)
 	for (int i = 0; i < PIPE_DEV_NR; ++i) {
 		pipe_dev[i] = kmalloc(sizeof(struct pipe_dev), GFP_KERNEL);
 		if (!pipe_dev[i]) {
-			pr_debug("Error(%d): kmalloc failed on pipe%d\n", err, i);
+			pr_debug("Error(%d): kmalloc failed on pipe%d\n", err,
+				 i);
 			continue;
 		}
 
@@ -70,8 +67,7 @@ int __init m_init(void)
 	return 0;
 }
 
-static
-void __exit m_exit(void)
+static void __exit m_exit(void)
 {
 	dev_t devno;
 
@@ -93,4 +89,3 @@ MODULE_LICENSE("GPL");
 MODULE_AUTHOR("d0u9");
 MODULE_DESCRIPTION("A pipe like device to illustrate the skill of how to put"
 		   "the read/write process into sleep");
-

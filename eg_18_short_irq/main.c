@@ -29,7 +29,8 @@ int short_release(struct inode *inode, struct file *filp)
 	return 0;
 }
 
-ssize_t short_read(struct file *filp, char __user *buf, size_t count, loff_t *f_pos)
+ssize_t short_read(struct file *filp, char __user *buf, size_t count,
+		   loff_t *f_pos)
 {
 	unsigned long flags;
 	int val;
@@ -45,7 +46,7 @@ ssize_t short_read(struct file *filp, char __user *buf, size_t count, loff_t *f_
 }
 
 ssize_t short_write(struct file *filp, const char __user *buf, size_t count,
-		loff_t *f_pos)
+		    loff_t *f_pos)
 {
 	unsigned long port = short_base;
 	unsigned char *kbuf, *ptr;
@@ -61,7 +62,8 @@ ssize_t short_write(struct file *filp, const char __user *buf, size_t count,
 	ptr = kbuf;
 
 	while (cnt--) {
-		pr_debug("port=%lu(%#lx), val=%d(%#x)\n", port, port, *ptr, *ptr);
+		pr_debug("port=%lu(%#lx), val=%d(%#x)\n", port, port, *ptr,
+			 *ptr);
 		outb(*(ptr++), port);
 		wmb();
 	}
@@ -72,16 +74,16 @@ ssize_t short_write(struct file *filp, const char __user *buf, size_t count,
 }
 
 static struct file_operations fops = {
-	.owner	 = THIS_MODULE,
-	.read	 = short_read,
-	.write	 = short_write,
-	.open	 = short_open,
+	.owner = THIS_MODULE,
+	.read = short_read,
+	.write = short_write,
+	.open = short_open,
 	.release = short_release,
 };
 
 irqreturn_t irq_service(int irq, void *dev_id)
 {
-	struct short_dev *dev = (struct short_dev*)(dev_id);
+	struct short_dev *dev = (struct short_dev *)(dev_id);
 	unsigned long flags;
 
 	if (short_irq != irq)
@@ -95,8 +97,7 @@ irqreturn_t irq_service(int irq, void *dev_id)
 	return IRQ_HANDLED;
 }
 
-static
-int __init m_init(void)
+static int __init m_init(void)
 {
 	int result = 0;
 	short_base = base;
@@ -116,8 +117,8 @@ int __init m_init(void)
 	}
 
 	if (short_irq >= 0) {
-		result = request_irq(short_irq, irq_service, 0,
-				     MODULE_NAME, dev);
+		result = request_irq(short_irq, irq_service, 0, MODULE_NAME,
+				     dev);
 		if (result) {
 			pr_err("Request irq %d failed\n", short_irq);
 			short_irq = -1;
@@ -150,8 +151,7 @@ out:
 	return result;
 }
 
-static
-void __exit m_exit(void)
+static void __exit m_exit(void)
 {
 	outb(0, short_base + 1);
 	wmb();
@@ -160,7 +160,6 @@ void __exit m_exit(void)
 	release_region(short_base, SHORT_NR_PORTS);
 	kfree(dev);
 }
-
 
 module_init(m_init);
 module_exit(m_exit);

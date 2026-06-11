@@ -10,13 +10,13 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#define BATCH_SIZE	3
-#define DEV_FILE	"/dev/async_io"
-#define MAX_LOOP	5
+#define BATCH_SIZE 3
+#define DEV_FILE "/dev/async_io"
+#define MAX_LOOP 5
 
-#define BUF_SIZE	(BATCH_SIZE * sizeof(int))
-#define READ_SIGNAL	SIGUSR1
-#define WRITE_SIGNAL	SIGUSR2
+#define BUF_SIZE (BATCH_SIZE * sizeof(int))
+#define READ_SIGNAL SIGUSR1
+#define WRITE_SIGNAL SIGUSR2
 
 static volatile sig_atomic_t got_quit_sig = 0;
 static volatile sig_atomic_t got_read_sig = 0;
@@ -45,7 +45,7 @@ void cancel_aio_ops(struct aiocb *aiocb, const char *prefix)
 {
 	int ret;
 	ret = aio_cancel(aiocb->aio_fildes, aiocb);
-	switch(ret) {
+	switch (ret) {
 	case AIO_CANCELED:
 		printf("%s: I/O canceled\n", prefix);
 		break;
@@ -67,7 +67,7 @@ void *read_thread(void *arg)
 	int i, ret, loop;
 	int *buf;
 	sigset_t sigset;
-	struct aiocb *aiocb_read = (struct aiocb*)arg;
+	struct aiocb *aiocb_read = (struct aiocb *)arg;
 
 	sigemptyset(&sigset);
 	sigaddset(&sigset, WRITE_SIGNAL);
@@ -76,10 +76,10 @@ void *read_thread(void *arg)
 	// Write goes first here
 	sleep(1);
 
-	buf = (int*)(aiocb_read->aio_buf);
+	buf = (int *)(aiocb_read->aio_buf);
 	got_read_sig = 1;
 	// for (loop = 0; loop < MAX_LOOP; loop++) {
-	for (loop = 0; ; loop++) {
+	for (loop = 0;; loop++) {
 		if (got_quit_sig) {
 			cancel_aio_ops(aiocb_read, "read");
 			goto exit;
@@ -91,7 +91,8 @@ void *read_thread(void *arg)
 			if (loop != 0) {
 				ret = aio_error(aiocb_read);
 				if (ret != 0 && ret != EINPROGRESS) {
-					printf("last aio_read() failed, %x, %s\n", ret, strerror(ret));
+					printf("last aio_read() failed, %x, %s\n",
+					       ret, strerror(ret));
 					goto exit;
 				}
 
@@ -108,13 +109,13 @@ void *read_thread(void *arg)
 			sleep(3);
 			ret = aio_read(aiocb_read);
 			if (ret < 0) {
-				printf("aio_read() returns %d, %s\n", ret, strerror(errno));
+				printf("aio_read() returns %d, %s\n", ret,
+				       strerror(errno));
 				goto exit;
 			}
 		} else {
 			usleep(1000 * 100);
 		}
-
 	}
 exit:
 
@@ -186,18 +187,19 @@ int main(int argc, char *argv[])
 		goto out;
 	}
 
-	aiocb_read.aio_fildes	= aiocb_write.aio_fildes =	fd;
-	aiocb_read.aio_nbytes	= aiocb_write.aio_nbytes =	BUF_SIZE;
-	aiocb_read.aio_reqprio	= aiocb_write.aio_reqprio = 0;
-	aiocb_read.aio_offset	= aiocb_write.aio_offset = 0;
-	aiocb_read.aio_buf	= read_buf;
-	aiocb_write.aio_buf	= write_buf;
+	aiocb_read.aio_fildes = aiocb_write.aio_fildes = fd;
+	aiocb_read.aio_nbytes = aiocb_write.aio_nbytes = BUF_SIZE;
+	aiocb_read.aio_reqprio = aiocb_write.aio_reqprio = 0;
+	aiocb_read.aio_offset = aiocb_write.aio_offset = 0;
+	aiocb_read.aio_buf = read_buf;
+	aiocb_write.aio_buf = write_buf;
 	aiocb_read.aio_sigevent.sigev_notify = SIGEV_SIGNAL;
 	aiocb_write.aio_sigevent.sigev_notify = SIGEV_SIGNAL;
 	aiocb_read.aio_sigevent.sigev_signo = READ_SIGNAL;
 	aiocb_write.aio_sigevent.sigev_signo = WRITE_SIGNAL;
 
-	ret = pthread_create(&read_tid, NULL, read_thread, (void*)(&aiocb_read));
+	ret = pthread_create(&read_tid, NULL, read_thread,
+			     (void *)(&aiocb_read));
 	if (ret != 0) {
 		fprintf(stderr, "Create write thread failed: %s\n",
 			strerror(errno));
@@ -208,7 +210,7 @@ int main(int argc, char *argv[])
 	sigaddset(&sigset, READ_SIGNAL);
 	pthread_sigmask(SIG_BLOCK, &sigset, NULL);
 
-	buf = (int*)(aiocb_write.aio_buf);
+	buf = (int *)(aiocb_write.aio_buf);
 	cnt = 0;
 	got_write_sig = 1;
 	for (loop = 0; loop < MAX_LOOP;) {
@@ -224,7 +226,8 @@ int main(int argc, char *argv[])
 			if (loop != 0) {
 				ret = aio_error(&aiocb_write);
 				if (ret != 0 && ret != EINPROGRESS) {
-					printf("last aio_write() failed, %x, %s\n", ret, strerror(ret));
+					printf("last aio_write() failed, %x, %s\n",
+					       ret, strerror(ret));
 					goto exit;
 				}
 			}
@@ -236,7 +239,8 @@ int main(int argc, char *argv[])
 			}
 			ret = aio_write(&aiocb_write);
 			if (ret < 0) {
-				printf("aio_write() returns %d, %s\n", ret, strerror(errno));
+				printf("aio_write() returns %d, %s\n", ret,
+				       strerror(errno));
 				goto exit;
 			}
 			loop++;
@@ -255,4 +259,3 @@ exit:
 out:
 	return ret;
 }
-

@@ -21,7 +21,7 @@ int pipe_open(struct inode *inode, struct file *filp)
 }
 
 ssize_t pipe_read(struct file *filp, char __user *buff, size_t count,
-	loff_t *f_pos)
+		  loff_t *f_pos)
 {
 	int retval = 0;
 	struct pipe_dev *dev = filp->private_data;
@@ -40,7 +40,7 @@ ssize_t pipe_read(struct file *filp, char __user *buff, size_t count,
 			return -EAGAIN;
 
 		pr_debug("read: process %d(%s) is going to sleep\n",
-		       current->pid, current->comm);
+			 current->pid, current->comm);
 
 		prepare_to_wait(&dev->rd_queue, &wait, TASK_INTERRUPTIBLE);
 		if (!dev->buff_len)
@@ -63,8 +63,8 @@ ssize_t pipe_read(struct file *filp, char __user *buff, size_t count,
 		goto copy_error;
 	}
 
-	pr_debug("read: f_pos=%lld, count=%lu, buff_len=%d\n",
-	       *f_pos, count, dev->buff_len);
+	pr_debug("read: f_pos=%lld, count=%lu, buff_len=%d\n", *f_pos, count,
+		 dev->buff_len);
 
 	*f_pos += count;
 
@@ -73,7 +73,7 @@ ssize_t pipe_read(struct file *filp, char __user *buff, size_t count,
 		dev->buff_len = 0;
 		*f_pos = 0;
 		pr_debug("read: process %d(%s) awakening the writers...\n",
-		       current->pid, current->comm);
+			 current->pid, current->comm);
 		wake_up_interruptible(&dev->wr_queue);
 	}
 
@@ -84,8 +84,8 @@ copy_error:
 	return retval;
 }
 
-ssize_t pipe_write(struct file *filp, const char __user *buff,
-		   size_t count, loff_t *f_pos)
+ssize_t pipe_write(struct file *filp, const char __user *buff, size_t count,
+		   loff_t *f_pos)
 {
 	int retval = 0;
 	struct pipe_dev *dev = filp->private_data;
@@ -102,8 +102,8 @@ ssize_t pipe_write(struct file *filp, const char __user *buff,
 		if (filp->f_flags & O_NONBLOCK)
 			return -EAGAIN;
 
-		pr_debug("process %d(%s) is going to sleep\n",
-		       current->pid, current->comm);
+		pr_debug("process %d(%s) is going to sleep\n", current->pid,
+			 current->comm);
 
 		prepare_to_wait(&dev->wr_queue, &wait, TASK_INTERRUPTIBLE);
 		if (dev->buff_len)
@@ -126,8 +126,8 @@ ssize_t pipe_write(struct file *filp, const char __user *buff,
 		goto copy_error;
 	}
 
-	pr_debug("write: f_pos=%lld, count=%lu, buff_len=%d\n",
-	       *f_pos, count, dev->buff_len);
+	pr_debug("write: f_pos=%lld, count=%lu, buff_len=%d\n", *f_pos, count,
+		 dev->buff_len);
 
 	// we have successfully write something in the buff
 	if (count > 0) {
@@ -135,7 +135,7 @@ ssize_t pipe_write(struct file *filp, const char __user *buff,
 		*f_pos = 0;
 
 		pr_debug("write: process %d(%s) awakening the readers...\n",
-		       current->pid, current->comm);
+			 current->pid, current->comm);
 		wake_up_interruptible(&dev->rd_queue);
 	}
 
@@ -145,5 +145,3 @@ copy_error:
 	mutex_unlock(&dev->mutex);
 	return retval;
 }
-
-

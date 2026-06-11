@@ -5,15 +5,14 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#define DEV_PATH		"/dev/poll"
+#define DEV_PATH "/dev/poll"
 
-#define BUF_LEN			1024
+#define BUF_LEN 1024
 
-char buff[1024] = {0};
+char buff[1024] = { 0 };
 
 int main(void)
 {
-	
 	int fd = open(DEV_PATH, O_RDWR);
 	if (fd < 0) {
 		printf("open %s error\n", DEV_PATH);
@@ -38,11 +37,10 @@ int main(void)
 		}
 
 		if (pollfd.revents & POLLOUT) {
-			int len =sprintf(buff, "Hello world! -> %d", c);
+			int len = sprintf(buff, "Hello world! -> %d", c);
 			write(pollfd.fd, buff, len);
 			printf("[%d] write: %s\n", pollfd.fd, buff);
 		}
-
 	}
 
 	close(fd);

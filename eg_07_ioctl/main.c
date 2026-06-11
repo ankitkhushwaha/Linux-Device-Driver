@@ -19,8 +19,7 @@ static struct file_operations fops = {
 	.unlocked_ioctl = ioctl_ioctl,
 };
 
-static
-int __init m_init(void)
+static int __init m_init(void)
 {
 	dev_t devno;
 	int err = 0;
@@ -39,7 +38,8 @@ int __init m_init(void)
 	memcpy(ioctl_dev->buff, DEFAULT_MESSAGE, ARRAY_SIZE(DEFAULT_MESSAGE));
 	ioctl_dev->buf_len = ARRAY_SIZE(DEFAULT_MESSAGE);
 
-	err = alloc_chrdev_region(&devno, ioctl_minor, IOCTL_DEV_NR, MODULE_NAME);
+	err = alloc_chrdev_region(&devno, ioctl_minor, IOCTL_DEV_NR,
+				  MODULE_NAME);
 	if (err < 0) {
 		pr_debug("Can't get major!\n");
 		goto on_error;
@@ -63,8 +63,7 @@ on_error:
 	return err;
 }
 
-static
-void __exit m_exit(void)
+static void __exit m_exit(void)
 {
 	dev_t devno;
 
@@ -84,4 +83,3 @@ module_exit(m_exit);
 MODULE_AUTHOR("d0u9");
 MODULE_LICENSE("GPL");
 MODULE_DESCRIPTION("An ioctl() example");
-

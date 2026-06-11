@@ -14,9 +14,9 @@ static int proc_seq_show(struct seq_file *, void *);
 
 static struct seq_operations proc_seq_ops = {
 	.start = proc_seq_start,
-	.next  = proc_seq_next,
-	.stop  = proc_seq_stop,
-	.show  = proc_seq_show,
+	.next = proc_seq_next,
+	.stop = proc_seq_stop,
+	.show = proc_seq_show,
 };
 
 static char *data[DATA_BLOCK_NUM] = {
@@ -72,4 +72,3 @@ static int proc_seq_show(struct seq_file *s_file, void *v)
 	seq_printf(s_file, "%p: %s\n", v, (char *)v);
 	return 0;
 }
-

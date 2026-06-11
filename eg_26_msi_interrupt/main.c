@@ -7,13 +7,17 @@
 
 #include "main.h"
 
-#define PCI_VENDOR_ID_QEMU		0x1234
-#define PCI_KMOD_EDU_VENDOR_ID		PCI_VENDOR_ID_QEMU
-#define PCI_KMOD_EDU_DEVICE_ID		0x7863
+#define PCI_VENDOR_ID_QEMU 0x1234
+#define PCI_KMOD_EDU_VENDOR_ID PCI_VENDOR_ID_QEMU
+#define PCI_KMOD_EDU_DEVICE_ID 0x7863
 
 static struct pci_device_id ids[] = {
-	{ PCI_DEVICE(PCI_KMOD_EDU_VENDOR_ID, PCI_KMOD_EDU_DEVICE_ID), },
-	{ 0, }
+	{
+		PCI_DEVICE(PCI_KMOD_EDU_VENDOR_ID, PCI_KMOD_EDU_DEVICE_ID),
+	},
+	{
+		0,
+	}
 };
 MODULE_DEVICE_TABLE(pci, ids);
 
@@ -34,8 +38,8 @@ int dev_release(struct inode *inode, struct file *filp)
 }
 
 static struct file_operations fops = {
-	.owner   = THIS_MODULE,
-	.open    = dev_open,
+	.owner = THIS_MODULE,
+	.open = dev_open,
 	.release = dev_release,
 };
 
@@ -58,8 +62,6 @@ static int create_chrdev(struct irq_dev *irq_dev)
 		unregister_chrdev_region(irq_dev->devno, 1);
 		return rv;
 	}
-
-
 
 	return 0;
 }
@@ -90,8 +92,8 @@ static int irq_alloc(struct irq_dev *irq_dev)
 {
 	int i, irq, rv, nvec = PCI_KMOD_EDU_MAX_IRQ_VEC;
 
-	nvec = pci_alloc_irq_vectors(irq_dev->pcidev,
-				     1, nvec, PCI_IRQ_ALL_TYPES);
+	nvec = pci_alloc_irq_vectors(irq_dev->pcidev, 1, nvec,
+				     PCI_IRQ_ALL_TYPES);
 	if (nvec < 0) {
 		pr_err("pci_alloc_irq_vectors failed!\n");
 		return nvec;
@@ -100,7 +102,8 @@ static int irq_alloc(struct irq_dev *irq_dev)
 
 	for (i = 0; i < nvec; i++) {
 		irq = pci_irq_vector(irq_dev->pcidev, i);
-		rv = request_irq(irq, irq_service, 0, MODULE_NAME, irq_dev->irqs + i);
+		rv = request_irq(irq, irq_service, 0, MODULE_NAME,
+				 irq_dev->irqs + i);
 		pr_debug("request_irq(%d) == %d\n", irq, rv);
 		if (rv < 0)
 			goto fail;
@@ -208,7 +211,6 @@ static int probe(struct pci_dev *dev, const struct pci_device_id *id)
 	rv = pci_set_consistent_dma_mask(dev, DMA_BIT_MASK(64));
 	pr_err("ERROR  pci_set_consistent_dma_mask: %d\n", rv);
 
-
 	rv = irq_alloc(irq_dev);
 	if (rv < 0) {
 		dev_err(&dev->dev, "can't alloc irq\n");
@@ -249,24 +251,21 @@ static void remove(struct pci_dev *dev)
 }
 
 static struct pci_driver pci_driver = {
-	.name		= MODULE_NAME,
-	.id_table	= ids,
-	.probe		= probe,
-	.remove		= remove,
+	.name = MODULE_NAME,
+	.id_table = ids,
+	.probe = probe,
+	.remove = remove,
 };
 
-static
-int __init m_init(void)
+static int __init m_init(void)
 {
 	return pci_register_driver(&pci_driver);
 }
 
-static
-void __exit m_exit(void)
+static void __exit m_exit(void)
 {
 	pci_unregister_driver(&pci_driver);
 }
-
 
 module_init(m_init);
 module_exit(m_exit);
