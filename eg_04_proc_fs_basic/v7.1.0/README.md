@@ -52,6 +52,15 @@ Execute `cat /proc/proc_demo/proc_fs` in the command line, you will get
 Execute `cat /proc/proc_demo/proc_fs_mul` in the command line, you will get
 **Hello World!** three times.
 
+Since this module uses a `seq_file` with `single_open` to display info.
+function trace will look like,
+
+```
+[   89.020341] :proc_open: invoked
+[   89.020354] :proc_show: invoked
+[   89.020393] :proc_release: invoked
+```
+
 ## Note
 
 `proc_create_data()` accepts a data pointer which can be passed to `open()`

@@ -1,3 +1,5 @@
+#define pr_fmt(fmt) ":%s: " fmt, __func__
+
 #include <linux/init.h>
 #include <linux/kernel.h>
 #include <linux/module.h>
@@ -20,6 +22,7 @@ static struct proc_ops proc_ops = {
 
 static int proc_show(struct seq_file *m, void *v)
 {
+	pr_debug("invoked\n");
 	long c = (m->private) ? (long)m->private : 1;
 
 	for (int i = 0; i < c; ++i)
@@ -30,11 +33,13 @@ static int proc_show(struct seq_file *m, void *v)
 
 static int proc_open(struct inode *inode, struct file *filp)
 {
+	pr_debug("invoked\n");
 	return single_open(filp, proc_show, pde_data(inode));
 }
 
 static int proc_release(struct inode *inode, struct file *filp)
 {
+	pr_debug("invoked\n");
     return single_release(inode, filp);
 }
 
