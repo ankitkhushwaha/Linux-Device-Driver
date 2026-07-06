@@ -76,7 +76,7 @@ static ssize_t completion_write(struct file *filp, const char __user *buf,
 	pr_debug("process %d(%s) awakening the readers...\n", current->pid,
         current->comm);
 
-        #ifdef STRING    
+#ifdef STRING    
     int ret;
 	if (*pos >= CHAR_BLOCK_SIZE)
 		return -ENOSPC;
