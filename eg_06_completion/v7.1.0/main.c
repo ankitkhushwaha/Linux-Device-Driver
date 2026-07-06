@@ -1,6 +1,7 @@
 #define pr_fmt(fmt) ":%s: " fmt, __func__
 
 #include <linux/module.h>
+#include <linux/init.h>
 #include <linux/kernel.h>
 #include <linux/fs.h>
 #include <linux/cdev.h>
