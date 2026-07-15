@@ -30,8 +30,8 @@ static void __init init_pipe_dev(struct pipe_dev *dev)
 
 	cdev_init(&dev->cdev, &fops);
 	dev->cdev.owner = THIS_MODULE;
-    init_waitqueue_head(&dev->rd_queue);
-    init_waitqueue_head(&dev->wr_queue);
+	init_waitqueue_head(&dev->rd_queue);
+	init_waitqueue_head(&dev->wr_queue);
 }
 
 static int __init m_init(void)
@@ -72,7 +72,7 @@ static int __init m_init(void)
 		}
 
 		pipe_device = device_create(pipe_class, NULL, dev__t + i, NULL,
-					    MODULE_NAME);
+					    MODULE_NAME "-%d", i);
 		if (IS_ERR(pipe_device)) {
 			pr_err("Device create failed\n");
 			ret = PTR_ERR(pipe_device);
@@ -89,7 +89,7 @@ static int __init m_init(void)
 cdev_del:
 free_mem:
 	while (--i >= 0) {
-        device_destroy(pipe_class, dev__t + i);
+		device_destroy(pipe_class, dev__t + i);
 		cdev_del(&pipe_dev[i]->cdev);
 		kfree(pipe_dev[i]);
 		pipe_dev[i] = NULL;
@@ -102,16 +102,16 @@ unreg_chrdev:
 
 static void __exit m_exit(void)
 {
-    int i;
+	int i;
 
-    pr_info(MODULE_NAME " unloaded\n");
+	pr_info(MODULE_NAME " unloaded\n");
 
-    for (i = 0; i < PIPE_DEV_NR; i++) {
-        device_destroy(pipe_class, dev__t + i);
+	for (i = 0; i < PIPE_DEV_NR; i++) {
+		device_destroy(pipe_class, dev__t + i);
 		cdev_del(&pipe_dev[i]->cdev);
 		kfree(pipe_dev[i]);
 		pipe_dev[i] = NULL;
-    }
+	}
 
 	class_destroy(pipe_class);
 	unregister_chrdev_region(dev__t, PIPE_DEV_NR);
