@@ -2,12 +2,13 @@
 
 #include <linux/init.h>
 #include <linux/module.h>
-#include <linux/kernel.h>
 #include <linux/device.h>
 #include <linux/fs.h>
 #include <linux/slab.h>
 #include <linux/mutex.h>
 #include <linux/wait.h>
+#include <linux/cdev.h>
+#include <linux/err.h>
 
 #include "main.h"
 #include "fops.h"
