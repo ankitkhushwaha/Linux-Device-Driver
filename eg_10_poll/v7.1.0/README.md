@@ -6,14 +6,14 @@ any of them. Different from the tranditional block I/O, poll mechanism promise
 its users to monitor many file desciptors, normal file descriptrs or socket
 file descriptors. If any interested event occurs on any file desciptor, for
 example the file desciptor can be read or write, the poll will notify the user
-process and tell it what happlend.
+process and tell it what happened.
 
 In this example, we implement a simple char device to test our poll ability.
-After the module is successfully loaded, a timer will be used to control the
-device if it is readable of writable. Each time the timer is out, the read flag
-and write flag will be set to 1, and the value will be consumed when some
-processes read or write this device file. Here, we set the read flag each
-second elapsed, and set the write flag every two seconds elapsed.
+After the module is successfully loaded, Poll method checks whether buffer 
+has data to read or has space to write. If write call write data to buffer,
+it wakes up read `wake queue` and similary read call flushes out the data
+after sending data to userspace and free `N` bytes and wakes up write
+`wake queue`.
 
 ## build the module
 

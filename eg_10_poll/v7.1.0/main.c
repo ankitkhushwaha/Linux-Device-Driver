@@ -31,9 +31,8 @@ static void __init init_dev(struct poll_dev *dev)
 	cdev_init(&dev->cdev, &fops);
 	dev->cdev.owner = THIS_MODULE;
 
-	dev->buf_len = 0;
-	// dev->buf_len = ARRAY_SIZE(DFT_MSG);
-	// memcpy(dev->buff, DFT_MSG, dev->buf_len);
+	dev->buf_len = ARRAY_SIZE(DFT_MSG);
+	memcpy(dev->buff, DFT_MSG, dev->buf_len);
 }
 
 static int __init m_init(void)

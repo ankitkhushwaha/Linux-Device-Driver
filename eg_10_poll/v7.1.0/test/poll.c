@@ -21,7 +21,7 @@ int main(void)
 
 	struct pollfd pollfd = { fd, POLLIN | POLLOUT, 0 };
 
-	int c = 2;
+	int c = 5;
 	while (c--) {
 		printf("polling ...\n");
 
