@@ -45,7 +45,7 @@ ssize_t async_notify_read(struct file *filp, char __user *buff, size_t count,
 
 cpy_user_error:
 	mutex_unlock(&dev->mutex);
-	return count;
+	return retval;
 }
 
 ssize_t async_notify_write(struct file *filp, const char __user *buff,
